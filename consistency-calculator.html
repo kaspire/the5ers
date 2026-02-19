@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>30% Consistency Calculator — Prop Futures</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #07090c;
+    --bg1:      #0c1018;
+    --bg2:      #101620;
+    --bg3:      #141d2a;
+    --border:   #1c2a3a;
+    --border2:  #243040;
+    --green:    #00d68f;
+    --green2:   #009960;
+    --green-bg: rgba(0,214,143,0.08);
+    --amber:    #f5a623;
+    --amber2:   #c07800;
+    --amber-bg: rgba(245,166,35,0.08);
+    --red:      #ff3a5c;
+    --red2:     #c02040;
+    --red-bg:   rgba(255,58,92,0.08);
+    --blue:     #4db8ff;
+    --blue2:    #1a4a70;
+    --blue-bg:  rgba(77,184,255,0.08);
+    --text:     #b0c4d8;
+    --muted:    #3a5268;
+    --white:    #e4eef8;
+    --display:  'Bebas Neue', sans-serif;
+    --mono:     'IBM Plex Mono', monospace;
+    --cond:     'IBM Plex Sans Condensed', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  /* ── SCANLINES ── */
+  body::after {
+    content:'';
+    position:fixed; inset:0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.14) 3px, rgba(0,0,0,0.14) 4px);
+    pointer-events:none;
+    z-index:9999;
+  }
+
+  /* ═══════════════════════════════
+     HERO
+  ═══════════════════════════════ */
+  .hero {
+    background: var(--bg1);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 48px 42px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.7s ease both;
+  }
+
+  .hero-grid {
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity:0.25;
+  }
+
+  .hero-inner { position:relative; max-width:1080px; margin:0 auto; }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--amber);
+    border: 1px solid var(--amber2);
+    padding: 4px 12px;
+    margin-bottom: 18px;
+    text-transform: uppercase;
+    background: var(--amber-bg);
+  }
+
+  .hero-tag .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+    animation: pulse 1.4s infinite;
+  }
+
+  .hero h1 {
+    font-family: var(--display);
+    font-size: clamp(52px, 8vw, 96px);
+    line-height: 0.92;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+
+  .hero h1 .pct { color: var(--amber); }
+
+  .hero-sub {
+    font-family: var(--cond);
+    font-size: 15px;
+    font-weight: 300;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ═══════════════════════════════
+     MAIN LAYOUT
+  ═══════════════════════════════ */
+  .page { max-width: 1080px; margin:0 auto; padding: 40px 48px 0; }
+
+  .layout-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  /* ═══════════════════════════════
+     PANEL STYLE
+  ═══════════════════════════════ */
+  .panel {
+    background: var(--bg1);
+    border: 1px solid var(--border);
+    padding: 24px 26px;
+    animation: fadeUp 0.5s ease both;
+    position: relative;
+  }
+
+  .panel-title {
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-title .icon {
+    font-size: 20px;
+  }
+
+  .panel-subtitle {
+    font-family: var(--cond);
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: -12px;
+    margin-bottom: 18px;
+    font-weight: 300;
+  }
+
+  /* ═══════════════════════════════
+     FORM CONTROLS
+  ═══════════════════════════════ */
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 16px;
+    padding: 12px 14px;
+    transition: all 0.2s ease;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--blue);
+    background: var(--bg3);
+  }
+
+  .form-input::placeholder {
+    color: var(--muted);
+    opacity: 0.5;
+  }
+
+  /* Select dropdown */
+  .form-select {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 16px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .form-select:focus {
+    outline: none;
+    border-color: var(--blue);
+    background: var(--bg3);
+  }
+
+  /* Button */
+  .btn {
+    font-family: var(--cond);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px 20px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: transparent;
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .btn-add {
+    color: var(--green);
+    border-color: var(--green2);
+    background: var(--green-bg);
+  }
+
+  .btn-add:hover {
+    background: rgba(0,214,143,0.15);
+  }
+
+  /* Trade input row */
+  .trade-input-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+  }
+
+  /* ═══════════════════════════════
+     TRADE LOG
+  ═══════════════════════════════ */
+  .trade-log {
+    max-height: 380px;
+    overflow-y: auto;
+    margin-top: 16px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .trade-log::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .trade-log::-webkit-scrollbar-track {
+    background: var(--bg2);
+  }
+
+  .trade-log::-webkit-scrollbar-thumb {
+    background: var(--border2);
+    border-radius: 4px;
+  }
+
+  .trade-log::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+  }
+
+  .trade-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .trade-item {
+    display: grid;
+    grid-template-columns: 50px 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(28,42,58,0.4);
+    transition: background 0.15s ease;
+  }
+
+  .trade-item:last-child {
+    border-bottom: none;
+  }
+
+  .trade-item:hover {
+    background: var(--bg3);
+  }
+
+  .trade-num {
+    font-family: var(--display);
+    font-size: 20px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .trade-profit {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .trade-profit.positive { color: var(--green); }
+  .trade-profit.negative { color: var(--red); }
+
+  .trade-badge {
+    font-size: 8px;
+    letter-spacing: 2px;
+    padding: 3px 8px;
+    border: 1px solid;
+    text-transform: uppercase;
+  }
+
+  .trade-badge.largest {
+    color: var(--amber);
+    border-color: var(--amber2);
+    background: var(--amber-bg);
+  }
+
+  .btn-remove {
+    color: var(--red);
+    background: transparent;
+    border: 1px solid var(--red2);
+    padding: 6px 10px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-remove:hover {
+    background: var(--red-bg);
+  }
+
+  /* ═══════════════════════════════
+     STATUS PANEL
+  ═══════════════════════════════ */
+  .status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .status-item {
+    background: var(--bg2);
+    padding: 16px 18px;
+    text-align: center;
+  }
+
+  .status-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .status-value {
+    font-family: var(--display);
+    font-size: 32px;
+    line-height: 1;
+    color: var(--white);
+  }
+
+  .status-value.green { color: var(--green); }
+  .status-value.amber { color: var(--amber); }
+  .status-value.red   { color: var(--red); }
+  .status-value.blue  { color: var(--blue); }
+
+  /* ═══════════════════════════════
+     CONSISTENCY GAUGE
+  ═══════════════════════════════ */
+  .gauge-wrap {
+    margin-top: 20px;
+  }
+
+  .gauge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .gauge-title {
+    font-family: var(--cond);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .gauge-pct {
+    font-family: var(--display);
+    font-size: 28px;
+    letter-spacing: 1px;
+  }
+
+  .gauge-pct.good { color: var(--green); }
+  .gauge-pct.warn { color: var(--amber); }
+  .gauge-pct.bad  { color: var(--red); }
+
+  .gauge-track {
+    height: 32px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gauge-fill {
+    height: 100%;
+    transition: width 0.4s ease, background 0.4s ease;
+    position: relative;
+  }
+
+  .gauge-fill.good { background: var(--green); }
+  .gauge-fill.warn { background: var(--amber); }
+  .gauge-fill.bad  { background: var(--red); }
+
+  .gauge-threshold {
+    position: absolute;
+    left: 30%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--white);
+    opacity: 0.4;
+  }
+
+  .gauge-threshold::before {
+    content: '30%';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ═══════════════════════════════
+     COMPLIANCE STATUS BOX
+  ═══════════════════════════════ */
+  .compliance-box {
+    border-left: 4px solid;
+    padding: 18px 20px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .compliance-box.compliant {
+    border-color: var(--green);
+    background: var(--green-bg);
+  }
+
+  .compliance-box.soft-breach {
+    border-color: var(--red);
+    background: var(--red-bg);
+  }
+
+  .compliance-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+
+  .compliance-text {
+    flex: 1;
+  }
+
+  .compliance-status {
+    font-family: var(--display);
+    font-size: 20px;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+
+  .compliant .compliance-status { color: var(--green); }
+  .soft-breach .compliance-status { color: var(--red); }
+
+  .compliance-detail {
+    font-family: var(--cond);
+    font-size: 12px;
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  .compliant .compliance-detail { color: var(--text); }
+  .soft-breach .compliance-detail { color: var(--text); }
+
+  .compliance-detail strong { font-weight: 600; }
+
+  /* ═══════════════════════════════
+     MAX ALLOWED BOX
+  ═══════════════════════════════ */
+  .max-allowed-box {
+    background: var(--blue-bg);
+    border: 1px solid var(--blue2);
+    border-left: 4px solid var(--blue);
+    padding: 18px 20px;
+    margin-top: 20px;
+  }
+
+  .max-title {
+    font-family: var(--display);
+    font-size: 18px;
+    color: var(--blue);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .max-value {
+    font-family: var(--display);
+    font-size: 48px;
+    color: var(--white);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .max-note {
+    font-family: var(--cond);
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 300;
+  }
+
+  /* ═══════════════════════════════
+     HOW IT WORKS
+  ═══════════════════════════════ */
+  .explainer {
+    background: var(--bg1);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--amber);
+    padding: 24px 26px;
+    margin-top: 28px;
+    animation: fadeUp 0.5s 0.2s ease both;
+  }
+
+  .explainer-title {
+    font-family: var(--display);
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: var(--amber);
+    margin-bottom: 16px;
+  }
+
+  .explainer-content {
+    font-family: var(--cond);
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .explainer-content p {
+    margin-bottom: 12px;
+  }
+
+  .explainer-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  .explainer-content strong {
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  .explainer-content .highlight {
+    color: var(--amber);
+    font-weight: 600;
+  }
+
+  .explainer-content .good {
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .explainer-content .bad {
+    color: var(--red);
+    font-weight: 600;
+  }
+
+  .explainer-example {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  /* ═══════════════════════════════
+     ANIMATIONS
+  ═══════════════════════════════ */
+  @keyframes fadeIn  { from{opacity:0}   to{opacity:1} }
+  @keyframes fadeUp  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+  @keyframes pulse   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════
+     HERO
+═══════════════════════════════ -->
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-tag"><span class="dot"></span> EVALUATION & FUNDED RULES</div>
+    <h1><span class="pct">30%</span> Consistency<br>Calculator</h1>
+    <div class="hero-sub">Soft Breach Prevention · Max Trade Size · Compliance Tracking</div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ═══════════════════════════════
+       ACCOUNT SETUP + TRADE ENTRY
+  ═══════════════════════════════ -->
+  <div class="layout-2col">
+    <!-- Left: Account Setup -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">⚙️</span> Account Setup</div>
+      <div class="panel-subtitle">Configure your account size and profit target</div>
+
+      <div class="form-group">
+        <label class="form-label">Account Size</label>
+        <select class="form-select" id="accountSize">
+          <option value="25000">$25,000</option>
+          <option value="50000" selected>$50,000</option>
+          <option value="100000">$100,000</option>
+          <option value="150000">$150,000</option>
+          <option value="200000">$200,000</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Profit Target ($)</label>
+        <input type="number" class="form-input" id="profitTarget" value="3000" placeholder="3000">
+      </div>
+
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Consistency Rule</label>
+        <div style="font-family:var(--display);font-size:48px;color:var(--amber);line-height:1">30%</div>
+        <div style="font-family:var(--cond);font-size:11px;color:var(--muted);margin-top:4px">No single trade > 30% of total profits</div>
+      </div>
+    </div>
+
+    <!-- Right: Trade Entry -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">📝</span> Add Trade</div>
+      <div class="panel-subtitle">Enter your trade profit/loss to track consistency</div>
+
+      <div class="form-group">
+        <label class="form-label">Trade Profit/Loss ($)</label>
+        <div class="trade-input-row">
+          <input type="number" class="form-input" id="tradeInput" placeholder="500" step="0.01">
+          <button class="btn btn-add" onclick="addTrade()">+ Add Trade</button>
+        </div>
+      </div>
+
+      <div class="trade-log" id="tradeLog">
+        <div class="trade-empty">No trades yet. Add your first trade above.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       STATUS + STATS
+  ═══════════════════════════════ -->
+  <div class="layout-2col">
+    <!-- Left: Current Stats -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">📊</span> Current Stats</div>
+      
+      <div class="status-grid">
+        <div class="status-item">
+          <span class="status-label">Total Profit</span>
+          <div class="status-value blue" id="totalProfit">$0.00</div>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Largest Trade</span>
+          <div class="status-value amber" id="largestTrade">$0.00</div>
+        </div>
+      </div>
+
+      <!-- Consistency Gauge -->
+      <div class="gauge-wrap">
+        <div class="gauge-header">
+          <div class="gauge-title">Largest Trade as % of Total</div>
+          <div class="gauge-pct good" id="consistencyPct">0%</div>
+        </div>
+        <div class="gauge-track">
+          <div class="gauge-threshold"></div>
+          <div class="gauge-fill good" id="gaugeFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Compliance Status -->
+      <div class="compliance-box compliant" id="complianceBox">
+        <div class="compliance-icon">✓</div>
+        <div class="compliance-text">
+          <div class="compliance-status">COMPLIANT</div>
+          <div class="compliance-detail">You are within the 30% consistency rule. Keep trading!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Guidance -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">🎯</span> Trade Sizing Guide</div>
+
+      <!-- Max Allowed per Trade -->
+      <div class="max-allowed-box">
+        <div class="max-title">MAX ALLOWED PER TRADE</div>
+        <div class="max-value" id="maxAllowed">$0.00</div>
+        <div class="max-note" id="maxNote">Add your first trade to see guidance</div>
+      </div>
+
+      <!-- Additional info if soft breach -->
+      <div id="softBreachGuidance" style="display:none">
+        <div style="background:var(--red-bg);border:1px solid var(--red2);border-left:4px solid var(--red);padding:18px 20px;margin-top:20px">
+          <div style="font-family:var(--display);font-size:18px;color:var(--red);letter-spacing:2px;margin-bottom:8px">⚠ SOFT BREACH RECOVERY</div>
+          <div style="font-family:var(--cond);font-size:12px;color:var(--text);line-height:1.6;margin-bottom:10px">
+            Your largest trade is <strong id="breachPct">0%</strong> of total profits. To become compliant again:
+          </div>
+          <div style="font-family:var(--display);font-size:36px;color:var(--white);margin-bottom:6px">
+            Need <span style="color:var(--green)" id="neededProfit">$0.00</span> more
+          </div>
+          <div style="font-family:var(--cond);font-size:11px;color:var(--muted)">
+            Total profit target: <span id="neededTotal">$0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       HOW IT WORKS EXPLAINER
+  ═══════════════════════════════ -->
+  <div class="explainer">
+    <div class="explainer-title">📖 How the 30% Consistency Rule Works</div>
+    <div class="explainer-content">
+      <p>
+        The <strong>30% consistency rule</strong> ensures traders demonstrate <span class="highlight">consistent performance</span> 
+        rather than relying on one oversized winning trade. This rule applies to both <strong>evaluation</strong> and <strong>funded accounts</strong>.
+      </p>
+      
+      <p>
+        <strong>✓ The Rule:</strong> No single trade may account for more than <span class="highlight">30% of your total profits</span>.
+      </p>
+
+      <p>
+        <strong>What is a "Soft Breach"?</strong><br>
+        A <span class="bad">soft breach</span> occurs when a single trade exceeds 30% of your current total profit. 
+        Unlike a hard breach, this does <span class="good">NOT immediately fail your account</span>. Instead, you simply need to 
+        <strong>continue trading and increase your total profits</strong> until that oversized trade drops below the 30% threshold.
+      </p>
+
+      <div class="explainer-example">
+        <strong>Example:</strong> You make a $1,200 trade<br>
+        • $1,200 ÷ 0.30 = <span style="color:var(--green)">$4,000 total profit required</span><br>
+        • Current total: $2,000 → <span style="color:var(--red)">Soft breach (60%)</span><br>
+        • Once total hits $4,000 → <span style="color:var(--green)">$1,200 = 30% → Compliant</span>
+      </div>
+
+      <p>
+        <strong>Key Takeaway:</strong> You can pass evaluation in <span class="good">one day</span>, but you must maintain consistency. 
+        If you soft breach, keep trading to dilute that large trade. There's no time penalty — just keep building total profit.
+      </p>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // ═══════════════════════════════
+  // STATE
+  // ═══════════════════════════════
+  let trades = [];
+  let accountSize = 50000;
+  let profitTarget = 3000;
+
+  // ═══════════════════════════════
+  // INIT
+  // ═══════════════════════════════
+  document.getElementById('accountSize').addEventListener('change', function() {
+    accountSize = parseInt(this.value);
+    // Auto-update profit target based on common prop targets
+    const targets = {
+      25000: 1500,
+      50000: 3000,
+      100000: 6000,
+      150000: 9000,
+      200000: 12000
+    };
+    profitTarget = targets[accountSize] || 3000;
+    document.getElementById('profitTarget').value = profitTarget;
+    updateDisplay();
+  });
+
+  document.getElementById('profitTarget').addEventListener('input', function() {
+    profitTarget = parseFloat(this.value) || 0;
+    updateDisplay();
+  });
+
+  document.getElementById('tradeInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      addTrade();
+    }
+  });
+
+  // ═══════════════════════════════
+  // ADD TRADE
+  // ═══════════════════════════════
+  function addTrade() {
+    const input = document.getElementById('tradeInput');
+    const value = parseFloat(input.value);
+    
+    if (isNaN(value) || value === 0) {
+      return;
+    }
+
+    trades.push(value);
+    input.value = '';
+    updateDisplay();
+  }
+
+  // ═══════════════════════════════
+  // REMOVE TRADE
+  // ═══════════════════════════════
+  function removeTrade(index) {
+    trades.splice(index, 1);
+    updateDisplay();
+  }
+
+  // ═══════════════════════════════
+  // UPDATE DISPLAY
+  // ═══════════════════════════════
+  function updateDisplay() {
+    // Calculate stats
+    const totalProfit = trades.reduce((sum, t) => sum + t, 0);
+    const largestTrade = trades.length > 0 ? Math.max(...trades.map(Math.abs)) : 0;
+    const consistencyPct = totalProfit > 0 ? (largestTrade / totalProfit) * 100 : 0;
+    
+    // Max allowed per trade (30% of current total)
+    const maxAllowed = totalProfit * 0.30;
+
+    // Render trade log
+    renderTradeLog();
+
+    // Update stats
+    document.getElementById('totalProfit').textContent = '$' + totalProfit.toFixed(2);
+    document.getElementById('largestTrade').textContent = '$' + largestTrade.toFixed(2);
+    document.getElementById('consistencyPct').textContent = consistencyPct.toFixed(1) + '%';
+
+    // Update gauge
+    const gaugeFill = document.getElementById('gaugeFill');
+    const gaugePct = document.getElementById('consistencyPct');
+    const fillWidth = Math.min(consistencyPct, 100);
+    gaugeFill.style.width = fillWidth + '%';
+
+    // Color coding
+    if (consistencyPct <= 30) {
+      gaugeFill.className = 'gauge-fill good';
+      gaugePct.className = 'gauge-pct good';
+    } else if (consistencyPct <= 40) {
+      gaugeFill.className = 'gauge-fill warn';
+      gaugePct.className = 'gauge-pct warn';
+    } else {
+      gaugeFill.className = 'gauge-fill bad';
+      gaugePct.className = 'gauge-pct bad';
+    }
+
+    // Compliance status
+    const complianceBox = document.getElementById('complianceBox');
+    const softBreachGuidance = document.getElementById('softBreachGuidance');
+
+    if (totalProfit === 0) {
+      // No trades yet
+      complianceBox.className = 'compliance-box compliant';
+      complianceBox.innerHTML = `
+        <div class="compliance-icon">✓</div>
+        <div class="compliance-text">
+          <div class="compliance-status">READY TO TRADE</div>
+          <div class="compliance-detail">Add your first trade to start tracking consistency.</div>
+        </div>
+      `;
+      softBreachGuidance.style.display = 'none';
+
+      document.getElementById('maxAllowed').textContent = '$0.00';
+      document.getElementById('maxNote').textContent = 'Add your first trade to see guidance';
+    } else if (consistencyPct <= 30) {
+      // Compliant
+      complianceBox.className = 'compliance-box compliant';
+      complianceBox.innerHTML = `
+        <div class="compliance-icon">✓</div>
+        <div class="compliance-text">
+          <div class="compliance-status">COMPLIANT</div>
+          <div class="compliance-detail">
+            Your largest trade is <strong>${consistencyPct.toFixed(1)}%</strong> of total profits. You're within the 30% rule — keep trading!
+          </div>
+        </div>
+      `;
+      softBreachGuidance.style.display = 'none';
+
+      document.getElementById('maxAllowed').textContent = '$' + maxAllowed.toFixed(2);
+      document.getElementById('maxNote').textContent = 'Current maximum allowed per trade to stay compliant';
+    } else {
+      // Soft breach
+      const neededTotal = largestTrade / 0.30;
+      const neededMore = neededTotal - totalProfit;
+
+      complianceBox.className = 'compliance-box soft-breach';
+      complianceBox.innerHTML = `
+        <div class="compliance-icon">⚠️</div>
+        <div class="compliance-text">
+          <div class="compliance-status">SOFT BREACH</div>
+          <div class="compliance-detail">
+            Your largest trade ($${largestTrade.toFixed(2)}) is <strong>${consistencyPct.toFixed(1)}%</strong> of total profits. 
+            Continue trading to increase total profit and become compliant again.
+          </div>
+        </div>
+      `;
+      
+      softBreachGuidance.style.display = 'block';
+      document.getElementById('breachPct').textContent = consistencyPct.toFixed(1) + '%';
+      document.getElementById('neededProfit').textContent = '$' + neededMore.toFixed(2);
+      document.getElementById('neededTotal').textContent = '$' + neededTotal.toFixed(2);
+
+      // Max allowed still calculated as 30% of current total
+      document.getElementById('maxAllowed').textContent = '$' + maxAllowed.toFixed(2);
+      document.getElementById('maxNote').textContent = 'Keep new trades under this amount while recovering';
+    }
+  }
+
+  // ═══════════════════════════════
+  // RENDER TRADE LOG
+  // ═══════════════════════════════
+  function renderTradeLog() {
+    const logEl = document.getElementById('tradeLog');
+
+    if (trades.length === 0) {
+      logEl.innerHTML = '<div class="trade-empty">No trades yet. Add your first trade above.</div>';
+      return;
+    }
+
+    const largestTrade = Math.max(...trades.map(Math.abs));
+
+    const html = trades.map((trade, idx) => {
+      const isLargest = Math.abs(trade) === largestTrade;
+      const profitClass = trade >= 0 ? 'positive' : 'negative';
+      
+      return `
+        <div class="trade-item">
+          <div class="trade-num">#${idx + 1}</div>
+          <div class="trade-profit ${profitClass}">
+            ${trade >= 0 ? '+' : ''}$${trade.toFixed(2)}
+          </div>
+          ${isLargest ? '<span class="trade-badge largest">LARGEST</span>' : '<span></span>'}
+          <button class="btn-remove" onclick="removeTrade(${idx})">✕ Remove</button>
+        </div>
+      `;
+    }).join('');
+
+    logEl.innerHTML = html;
+  }
+
+  // Init display
+  updateDisplay();
+</script>
+
+</body>
+</html>
