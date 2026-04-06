@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The5ers Futures Program</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #0f1318;
+    --surface2: #151a22;
+    --border: #1e2530;
+    --accent: #00c896;
+    --accent2: #00a3ff;
+    --accent-glow: rgba(0,200,150,0.15);
+    --text: #e0e6f0;
+    --text-muted: #5a6a80;
+    --text-dim: #8a9ab0;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Chakra Petch', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,150,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,150,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(ellipse, rgba(0,200,150,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 680px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,200,150,0.08);
+    border: 1px solid rgba(0,200,150,0.25);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--text);
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 12px;
+  }
+
+  .links-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .link-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .link-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+    transform-origin: bottom;
+  }
+
+  .link-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--accent-glow), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .link-card:hover {
+    border-color: rgba(0,200,150,0.3);
+    transform: translateX(4px);
+    background: var(--surface2);
+  }
+
+  .link-card:hover::before { transform: scaleY(1); }
+  .link-card:hover::after { opacity: 1; }
+
+  .link-card:nth-child(1) { animation-delay: 0.1s; }
+  .link-card:nth-child(2) { animation-delay: 0.15s; }
+  .link-card:nth-child(3) { animation-delay: 0.2s; }
+  .link-card:nth-child(4) { animation-delay: 0.25s; }
+  .link-card:nth-child(5) { animation-delay: 0.3s; }
+  .link-card:nth-child(6) { animation-delay: 0.35s; }
+  .link-card:nth-child(7) { animation-delay: 0.4s; }
+  .link-card:nth-child(8) { animation-delay: 0.45s; }
+
+  .link-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(0,200,150,0.07);
+    border: 1px solid rgba(0,200,150,0.12);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 15px;
+    position: relative;
+    z-index: 1;
+    transition: background 0.2s;
+  }
+
+  .link-card:hover .link-icon {
+    background: rgba(0,200,150,0.14);
+    border-color: rgba(0,200,150,0.3);
+  }
+
+  .link-content {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .link-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    transition: color 0.2s;
+  }
+
+  .link-card:hover .link-title { color: #fff; }
+
+  .link-url {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    letter-spacing: 0.02em;
+  }
+
+  .link-arrow {
+    color: var(--text-muted);
+    font-size: 14px;
+    position: relative;
+    z-index: 1;
+    transition: all 0.2s ease;
+    font-family: monospace;
+  }
+
+  .link-card:hover .link-arrow {
+    color: var(--accent);
+    transform: translateX(3px);
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 20px 0 8px 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 40px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    animation: fadeUp 0.5s 0.5s ease both;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="badge">Resource Hub</div>
+    <h1>The5ers <span>Futures</span> Program</h1>
+    <p class="subtitle">Quick Access — All Resources</p>
+  </div>
+
+  <div class="links-grid">
+
+    <div class="section-label">Getting Started</div>
+
+    <a class="link-card" href="https://kaspire.github.io/the5ers/discord.html" target="_blank">
+      <div class="link-icon">💬</div>
+      <div class="link-content">
+        <div class="link-title">How to Join The5ers CFD Discord</div>
+        <div class="link-url">discord.html</div>
+      </div>
+      <div class="link-arrow">→</div>
+    </a>
+
+    <a class="link-card" href="https://kaspire.github.io/the5ers/futuresguide.html" target="_blank">
+      <div class="link-icon">📘</div>
+      <div class="link-content">
+        <div class="link-title">The5ers Futures Guide</div>
+        <div class="link-url">futuresguide.html</div>
+      </div>
+      <div class="link-arrow">→</div>
+    </a>
+
+    <div class="section-label">Plans & Rules</div>
+
+    <a class="link-card" href="https://kaspire.github.io/the5ers/plans.html" target="_blank">
+      <div class="link-icon">⚖️</div>
+      <div class="link-content">
+        <div class="link-title">Basecamp / Rebate Plans Compared</div>
+        <div class="link-url">plans.html</div>
+      </div>
+      <div class="link-arrow">→</div>
+    </a>
+
+    <a class="link-card" href="https://kaspire.github.io/the5ers/eod.html" target="_blank">
+      <div class="link-icon">🕐</div>
+      <div class="link-content">
+        <div class="link-title">End of Day (EOD) Explained</div>
+        <div class="link-url">eod.html</div>
+      </div>
+      <div class="link-arrow">→</div>
+    </a>
+
+    <div class="section-label">Calculators & Tools</div>
+
+    <a class="link-card" href="https://kaspire.github.io/the5ers/consistency.html" target="_blank">
+      <div class="link-icon">📊</div>
+      <div class="link-content">
+        <div class="link-title">Consistency Calculator</div>
+        <div class="link-url">consistency.html</div>
+      </div>
+      <div class="link-arrow">→</div>
+    </a>
+
+    <a class="link-card" href="https://kaspire.github.io/the5ers/dashboard.html" target="_blank">
+      <div class="link-icon">🖥️</div>
+      <div class="link-content">
+        <div class="link-title">Consistency & EOD Calculator</div>
+        <div class="link-url">dashboard.html</div>
+      </div>
+      <div class="link-arrow">→</div>
+    </a>
+
+    <a class="link-card" href="https://kaspire.github.io/the5ers/riskcalculator.html" target="_blank">
+      <div class="link-icon">🎯</div>
+      <div class="link-content">
+        <div class="link-title">Risk Calculator</div>
+        <div class="link-url">riskcalculator.html</div>
+      </div>
+      <div class="link-arrow">→</div>
+    </a>
+
+    <div class="section-label">Reference</div>
+
+    <a class="link-card" href="https://kaspire.github.io/the5ers/dxy.html" target="_blank">
+      <div class="link-icon">💵</div>
+      <div class="link-content">
+        <div class="link-title">DXY Infographic</div>
+        <div class="link-url">dxy.html</div>
+      </div>
+      <div class="link-arrow">→</div>
+    </a>
+
+  </div>
+
+  <div class="footer">THE5ERS FUTURES · COMMUNITY RESOURCES</div>
+
+</div>
+</body>
+</html>
