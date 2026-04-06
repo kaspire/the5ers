@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DXY Cross Indicator — Pre-Session Briefing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dxy-gold: #C8960A;
+    --dxy-gold-lt: #FFF3CC;
+    --dxy-gold-dk: #7A5A00;
+    --dxy-ink: #1a1a18;
+    --dxy-muted: #6b6a64;
+    --dxy-surface: #f4f3ee;
+    --dxy-card: #ffffff;
+    --dxy-page: #f0efe9;
+    --dxy-border: rgba(0,0,0,0.12);
+    --dxy-border-mid: rgba(0,0,0,0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --dxy-ink: #e8e6dc;
+      --dxy-muted: #9c9a92;
+      --dxy-surface: #2a2a27;
+      --dxy-card: #1e1e1b;
+      --dxy-page: #161614;
+      --dxy-border: rgba(255,255,255,0.10);
+      --dxy-border-mid: rgba(255,255,255,0.18);
+      --dxy-gold-lt: #3a2e00;
+      --dxy-gold-dk: #f0c040;
+    }
+  }
+
+  body {
+    background: var(--dxy-page);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--dxy-ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem 3rem;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 860px;
+    background: var(--dxy-card);
+    border: 0.5px solid var(--dxy-border-mid);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  /* Header */
+  .header {
+    padding: 2.5rem 2rem 2rem;
+    border-bottom: 0.5px solid var(--dxy-border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--dxy-gold);
+    margin-bottom: 6px;
+  }
+  .header-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(30px, 5vw, 44px);
+    line-height: 1.1;
+    color: var(--dxy-ink);
+  }
+  .header-title em { font-style: italic; color: var(--dxy-gold); }
+  .header-sub {
+    font-size: 13px;
+    color: var(--dxy-muted);
+    margin-top: 8px;
+    max-width: 480px;
+    line-height: 1.6;
+  }
+  .header-badge {
+    background: var(--dxy-gold-lt);
+    color: var(--dxy-gold-dk);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    padding: 7px 16px;
+    border-radius: 20px;
+    white-space: nowrap;
+    border: 0.5px solid var(--dxy-gold);
+    align-self: flex-start;
+    margin-top: 8px;
+  }
+
+  /* Grids */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    border-bottom: 0.5px solid var(--dxy-border);
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    border-bottom: 0.5px solid var(--dxy-border);
+  }
+  .card {
+    padding: 1.5rem;
+    border-right: 0.5px solid var(--dxy-border);
+  }
+  .card:last-child { border-right: none; }
+  .card-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--dxy-muted);
+    margin-bottom: 8px;
+  }
+  .card-num {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(32px, 5vw, 50px);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--dxy-ink);
+  }
+  .card-sub {
+    font-size: 12px;
+    color: var(--dxy-muted);
+    margin-top: 7px;
+    line-height: 1.55;
+  }
+  .card-sub strong { font-weight: 500; color: var(--dxy-ink); }
+
+  /* Basket bars */
+  .basket-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dxy-ink);
+    margin-bottom: 14px;
+  }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .bar-name { width: 36px; font-size: 12px; font-weight: 500; color: var(--dxy-ink); font-family: 'DM Mono', monospace; }
+  .bar-track { flex: 1; height: 7px; border-radius: 4px; background: var(--dxy-border); overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .bar-pct { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--dxy-muted); width: 38px; text-align: right; }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin: 2px 2px 0 0;
+  }
+
+  /* Indicator steps */
+  .section { padding: 1.5rem; border-bottom: 0.5px solid var(--dxy-border); }
+  .ind-steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .ind-step {
+    background: var(--dxy-surface);
+    border-radius: 8px;
+    padding: 14px 12px;
+    position: relative;
+    border: 0.5px solid var(--dxy-border);
+  }
+  .ind-n {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--dxy-border-mid);
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    line-height: 1;
+  }
+  .ind-title { font-size: 12px; font-weight: 500; color: var(--dxy-ink); margin-bottom: 5px; padding-right: 22px; }
+  .ind-desc { font-size: 11px; color: var(--dxy-muted); line-height: 1.55; }
+
+  /* Signal pair cards */
+  .sig-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .sig-card {
+    background: var(--dxy-surface);
+    border-radius: 8px;
+    padding: 14px 12px;
+    border: 0.5px solid var(--dxy-border);
+  }
+  .sig-card.focus { border-color: var(--dxy-gold); border-width: 1px; }
+  .sig-pair { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: var(--dxy-ink); margin-bottom: 2px; }
+  .sig-role { font-size: 11px; color: var(--dxy-muted); margin-bottom: 9px; }
+  .sig-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .sig-trait { font-size: 11px; color: var(--dxy-muted); line-height: 1.8; }
+  .sig-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+
+  /* Why grid */
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    border-bottom: 0.5px solid var(--dxy-border);
+  }
+  .why-item {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    border-right: 0.5px solid var(--dxy-border);
+    border-bottom: 0.5px solid var(--dxy-border);
+  }
+  .why-item:nth-child(2n) { border-right: none; }
+  .why-item:nth-last-child(-n+2) { border-bottom: none; }
+  .why-icon {
+    width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .why-t1 { font-size: 13px; font-weight: 500; color: var(--dxy-ink); margin-bottom: 3px; }
+  .why-t2 { font-size: 12px; color: var(--dxy-muted); line-height: 1.55; }
+
+  /* Footer */
+  .footer {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .footer-logo { font-family: 'DM Serif Display', serif; font-size: 14px; color: var(--dxy-gold); }
+  .footer-text { font-size: 11px; color: var(--dxy-muted); }
+
+  @media (max-width: 600px) {
+    .grid-3, .grid-2, .sig-grid, .ind-steps, .why-grid { grid-template-columns: 1fr; }
+    .card { border-right: none; border-bottom: 0.5px solid var(--dxy-border); }
+    .why-item { border-right: none; border-bottom: 0.5px solid var(--dxy-border); }
+    .why-item:last-child { border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="header-eyebrow">Pre-session briefing</div>
+      <div class="header-title">US Dollar<br>Index <em>DXY</em></div>
+      <div class="header-sub">Understanding the world's reserve currency benchmark — and how the DXY Cross Indicator turns it into actionable trade signals.</div>
+    </div>
+    <div class="header-badge">DXY Cross Indicator — Live Demo</div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-label">Est. daily FX volume</div>
+      <div class="card-num">$7.5T</div>
+      <div class="card-sub">Global forex daily turnover. USD is on one side of <strong>~88%</strong> of all transactions.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">DXY base value</div>
+      <div class="card-num">100.00</div>
+      <div class="card-sub">Index was set at 100 on <strong>March 1973</strong> — when Bretton Woods ended and free-floating FX began.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Currencies in basket</div>
+      <div class="card-num">6</div>
+      <div class="card-sub">EUR · JPY · GBP · CAD · SEK · CHF. All weighted by trade importance to the US.</div>
+    </div>
+  </div>
+
+  <!-- BASKET + WHY EUR -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="basket-title">DXY basket composition</div>
+      <div class="bar-row"><span class="bar-name">EUR</span><div class="bar-track"><div class="bar-fill" style="width:57.6%;background:#185FA5"></div></div><span class="bar-pct">57.6%</span></div>
+      <div class="bar-row"><span class="bar-name">JPY</span><div class="bar-track"><div class="bar-fill" style="width:13.6%;background:#0F6E56"></div></div><span class="bar-pct">13.6%</span></div>
+      <div class="bar-row"><span class="bar-name">GBP</span><div class="bar-track"><div class="bar-fill" style="width:11.9%;background:#C8960A"></div></div><span class="bar-pct">11.9%</span></div>
+      <div class="bar-row"><span class="bar-name">CAD</span><div class="bar-track"><div class="bar-fill" style="width:9.1%;background:#888780"></div></div><span class="bar-pct">&nbsp;9.1%</span></div>
+      <div class="bar-row"><span class="bar-name">SEK</span><div class="bar-track"><div class="bar-fill" style="width:4.2%;background:#888780"></div></div><span class="bar-pct">&nbsp;4.2%</span></div>
+      <div class="bar-row"><span class="bar-name">CHF</span><div class="bar-track"><div class="bar-fill" style="width:3.6%;background:#888780"></div></div><span class="bar-pct">&nbsp;3.6%</span></div>
+      <div class="card-sub" style="margin-top:12px">Formula: DXY = 50.14348112 × EUR<sup>–0.576</sup> × JPY<sup>0.136</sup> × GBP<sup>–0.119</sup> × CAD<sup>–0.091</sup> × SEK<sup>–0.042</sup> × CHF<sup>–0.036</sup></div>
+    </div>
+    <div class="card">
+      <div class="basket-title">Why EUR dominates the index</div>
+      <div class="card-sub" style="font-size:13px;margin-bottom:12px">The euro represents <strong>19 nations</strong> and the world's second-largest economy. Its 57.6% weight means DXY is, in practice, largely an inverted EUR/USD chart.</div>
+      <div class="card-sub" style="margin-bottom:14px">This creates a <strong>structural bias</strong> — a rising DXY nearly always correlates with EUR weakness, and vice versa.</div>
+      <div>
+        <span class="tag" style="background:#E6F1FB;color:#0C447C;border:0.5px solid #B5D4F4">EUR/USD –0.98 corr.</span>
+        <span class="tag" style="background:#E1F5EE;color:#085041;border:0.5px solid #9FE1CB">GBP/USD –0.92 corr.</span>
+        <span class="tag" style="background:#FAEEDA;color:#633806;border:0.5px solid #FAC775">USD/JPY +0.88 corr.</span>
+      </div>
+      <div class="card-sub" style="margin-top:10px">Average correlation vs DXY. Negative = inverse relationship.</div>
+    </div>
+  </div>
+
+  <!-- MARKETS COVERED -->
+  <div class="section">
+    <div class="basket-title">Markets covered by the DXY Cross Indicator</div>
+    <div class="sig-grid">
+      <div class="sig-card">
+        <div class="sig-pair">EUR/USD</div>
+        <div class="sig-role">The benchmark pair</div>
+        <div class="sig-trait">
+          <span class="sig-dot" style="background:#185FA5"></span>Highest liquidity globally<br>
+          <span class="sig-dot" style="background:#185FA5"></span>Tightest spreads<br>
+          <span class="sig-dot" style="background:#185FA5"></span>57.6% DXY weight — strongest cross-signal
+        </div>
+      </div>
+      <div class="sig-card focus">
+        <div class="sig-header">
+          <div class="sig-pair">GBP/USD</div>
+          <span class="tag" style="background:#FFF3CC;color:#7A5A00;border:0.5px solid #C8960A;font-size:10px">Today's focus</span>
+        </div>
+        <div class="sig-role">The cable</div>
+        <div class="sig-trait">
+          <span class="sig-dot" style="background:#C8960A"></span>11.9% DXY weight<br>
+          <span class="sig-dot" style="background:#C8960A"></span>High volatility — clear swings<br>
+          <span class="sig-dot" style="background:#C8960A"></span>London session overlap adds volume
+        </div>
+      </div>
+      <div class="sig-card">
+        <div class="sig-pair">USD/JPY</div>
+        <div class="sig-role">The safe haven pair</div>
+        <div class="sig-trait">
+          <span class="sig-dot" style="background:#0F6E56"></span>13.6% DXY weight<br>
+          <span class="sig-dot" style="background:#0F6E56"></span>+0.88 correlation (moves with DXY)<br>
+          <span class="sig-dot" style="background:#0F6E56"></span>Risk-off dynamics, BoJ sensitivity
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW THE INDICATOR WORKS -->
+  <div class="section">
+    <div class="basket-title" style="margin-bottom:4px">How the DXY Cross Indicator works</div>
+    <div class="card-sub" style="margin-bottom:14px">A multi-layer confluence system that reads DXY momentum and maps it onto your chosen currency pair.</div>
+    <div class="ind-steps">
+      <div class="ind-step"><div class="ind-n">1</div><div class="ind-title">DXY momentum read</div><div class="ind-desc">Calculates real-time DXY trend direction and strength from underlying components</div></div>
+      <div class="ind-step"><div class="ind-n">2</div><div class="ind-title">Cross-pair mapping</div><div class="ind-desc">Translates DXY signal to the active pair — accounting for correlation direction (+/–)</div></div>
+      <div class="ind-step"><div class="ind-n">3</div><div class="ind-title">Confluence filter</div><div class="ind-desc">Overlays price structure, session timing, and volatility to reduce noise signals</div></div>
+      <div class="ind-step"><div class="ind-n">4</div><div class="ind-title">Signal output</div><div class="ind-desc">Visual overlay on chart — bias, entry zone, and invalidation level</div></div>
+    </div>
+  </div>
+
+  <!-- WHY IT MATTERS -->
+  <div class="why-grid">
+    <div class="why-item">
+      <div class="why-icon" style="background:#E6F1FB">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#185FA5" stroke-width="1"/><line x1="7" y1="4" x2="7" y2="7.5" stroke="#185FA5" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="9.5" r="0.7" fill="#185FA5"/></svg>
+      </div>
+      <div><div class="why-t1">Context before entry</div><div class="why-t2">Most retail traders look at the pair in isolation. DXY gives the macro picture — you see why price is moving, not just that it moved.</div></div>
+    </div>
+    <div class="why-item">
+      <div class="why-icon" style="background:#E1F5EE">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 10L5.5 6.5L8 9L12 4" stroke="#0F6E56" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div><div class="why-t1">Confirmation edge</div><div class="why-t2">When DXY trend aligns with your trade direction, signal quality improves. Divergence is an early warning before price reacts.</div></div>
+    </div>
+    <div class="why-item">
+      <div class="why-icon" style="background:#FAEEDA">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="8" width="3" height="4" rx="1" fill="#BA7517"/><rect x="5.5" y="5" width="3" height="7" rx="1" fill="#BA7517"/><rect x="9" y="2" width="3" height="10" rx="1" fill="#BA7517"/></svg>
+      </div>
+      <div><div class="why-t1">Pair agnostic logic</div><div class="why-t2">Same underlying engine adapts to EUR/USD, GBP/USD and USD/JPY — a consistent framework, not three separate systems.</div></div>
+    </div>
+    <div class="why-item">
+      <div class="why-icon" style="background:#FBEAF0">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v3M7 9v3M2 7h3M9 7h3" stroke="#D4537E" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="7" r="2" stroke="#D4537E" stroke-width="1"/></svg>
+      </div>
+      <div><div class="why-t1">Built in Pine Script v6</div><div class="why-t2">Native TradingView integration. No external feeds or additional subscriptions required — runs directly on the chart.</div></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span class="footer-logo">DXY Cross</span>
+    <span class="footer-text">— Live chart walkthrough follows. GBP/USD primary demo · EUR/USD · USD/JPY available</span>
+  </div>
+
+</div>
+</body>
+</html>
