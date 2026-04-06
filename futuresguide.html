@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The5ers Futures — New Trader Startup Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #1a0a4a; --bg-card: #2B0F73; --bg-hover: #341288;
+    --border: #3d1a8f; --border-light: #4a23a0;
+    --accent: #D4FF6A; --accent-dim: rgba(212,255,106,0.12); --accent-glow: rgba(212,255,106,0.04);
+    --purple: #5A2DFF; --lime: #D4FF6A;
+    --warn: #FFB800; --danger: #ff6b6b;
+    --text: #d4d0e8; --text-bright: #f5f3ff; --text-heading: #ece8ff;
+    --text-dim: #b8b0d4; --text-muted: #8e82b5; --text-faint: #7a6da8; --text-ghost: #4a3d7a;
+    --font-body: 'Montserrat', -apple-system, sans-serif;
+    --font-heading: 'Montserrat', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .header { background: linear-gradient(135deg, #1a0a4a 0%, #2B0F73 50%, #200d5e 100%); border-bottom: 1px solid #3d1a8f; padding: 44px 24px 40px; text-align: center; }
+  .header-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent); font-weight: 600; margin-bottom: 12px; }
+  .header h1 { font-size: clamp(26px, 5vw, 40px); font-weight: 700; color: var(--text-bright); font-family: var(--font-heading); line-height: 1.15; margin-bottom: 12px; }
+  .header h1 span { color: var(--accent); }
+  .header p { font-size: 14px; color: var(--text-muted); max-width: 520px; margin: 0 auto; line-height: 1.65; }
+  .nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 20px; justify-content: center; border-bottom: 1px solid var(--bg-hover); position: sticky; top: 0; background: var(--bg); z-index: 10; }
+  .nav-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text-faint); font-size: 12px; font-family: var(--font-body); font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; }
+  .nav-btn:hover { border-color: #3a4150; color: var(--text-dim); }
+  .nav-btn.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+  .content { max-width: 800px; margin: 0 auto; padding: 32px 20px 64px; }
+  .section { display: none; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  h2 { font-size: 22px; font-weight: 700; color: var(--text-bright); font-family: var(--font-heading); margin-bottom: 18px; }
+  p { line-height: 1.8; margin-bottom: 16px; }
+  .card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 22px; margin-bottom: 16px; }
+  .card-label { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .info-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+  .info-card { background: var(--bg-hover); border: 1px solid var(--border-light); border-radius: 10px; padding: 16px 18px; flex: 1 1 140px; min-width: 140px; }
+  .info-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); margin-bottom: 6px; }
+  .info-card .value { font-size: 22px; font-weight: 700; color: var(--accent); font-family: var(--font-heading); }
+  .info-card .sub { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+  .step-item { display: flex; align-items: flex-start; margin-bottom: 10px; }
+  .step-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent-dim); color: var(--accent); font-weight: 700; font-size: 13px; font-family: var(--font-heading); margin-right: 12px; flex-shrink: 0; }
+  .step-item span { padding-top: 3px; line-height: 1.6; }
+  .step-link { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(212,255,106,0.3); transition: border-color 0.2s; cursor: pointer; }
+  .step-link:hover { border-bottom-color: var(--accent); }
+  .step-link-ext { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(212,255,106,0.3); transition: border-color 0.2s; }
+  .step-link-ext:hover { border-bottom-color: var(--accent); }
+  .accordion { border-left: 3px solid var(--border-light); margin-bottom: 12px; border-radius: 0 8px 8px 0; transition: all 0.3s ease; }
+  .accordion.open { border-left-color: var(--accent); background: var(--accent-glow); }
+  .accordion-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: none; border: none; color: var(--text); font-size: 15px; font-family: var(--font-body); font-weight: 600; cursor: pointer; text-align: left; transition: color 0.2s; }
+  .accordion.open .accordion-btn { color: var(--accent); }
+  .accordion-btn svg { flex-shrink: 0; transition: transform 0.3s ease; }
+  .accordion.open .accordion-btn svg { transform: rotate(180deg); }
+  .accordion-body { display: none; padding: 0 18px 16px; color: var(--text-dim); font-size: 14px; line-height: 1.7; }
+  .accordion.open .accordion-body { display: block; }
+  .table-wrap { overflow-x: auto; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--accent); color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+  th.subtle { border-bottom-color: var(--border-light); color: var(--text-faint); }
+  td { padding: 10px 12px; border-bottom: 1px solid #3d1a8f; color: var(--text-dim); }
+  td.bright { color: var(--text-heading); font-weight: 600; }
+  td.accent { color: var(--accent); font-weight: 600; }
+  td.mono { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); }
+  td.mono-accent { font-family: var(--font-mono); font-size: 12px; color: var(--accent); font-weight: 700; }
+  td.note { color: var(--text-muted); font-size: 12px; }
+  .alert { background: var(--bg-card); border-radius: 0 10px 10px 0; padding: 20px; margin-bottom: 16px; }
+  .alert-danger { border: 1px solid #3d1a3a; border-left: 3px solid var(--danger); }
+  .alert-warn { border: 1px solid #3d2a3a; border-left: 3px solid var(--warn); }
+  .alert-success { border: 1px solid #2B1a73; border-left: 3px solid var(--accent); }
+  .alert h4 { font-weight: 700; margin-bottom: 8px; font-size: 14px; }
+  .alert-danger h4 { color: var(--danger); } .alert-warn h4 { color: var(--warn); } .alert-success h4 { color: var(--accent); }
+  .alert p { margin: 0; line-height: 1.7; font-size: 13px; }
+  .tip-box { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 20px; margin-top: 20px; }
+  .tip-box .tip-label { font-size: 13px; font-weight: 600; color: var(--warn); margin-bottom: 10px; }
+  .tip-box p { margin: 0; line-height: 1.7; } .tip-box strong { color: var(--text-heading); }
+  .month-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(68px, 1fr)); gap: 8px; margin: 10px 0; }
+  .month-cell { background: var(--bg-hover); border-radius: 6px; padding: 8px 10px; text-align: center; border: 1px solid var(--border); }
+  .month-cell.quarterly { border-color: rgba(212,255,106,0.3); }
+  .month-cell .code { font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--text-faint); }
+  .month-cell.quarterly .code { color: var(--accent); }
+  .month-cell .name { font-size: 10px; color: var(--text-faint); }
+  .gloss-item { display: flex; border-bottom: 1px solid var(--bg-hover); padding: 12px 0; }
+  .gloss-term { min-width: 140px; font-weight: 600; color: var(--accent); font-family: var(--font-mono); font-size: 13px; padding-right: 16px; flex-shrink: 0; }
+  .gloss-def { font-size: 13px; line-height: 1.6; }
+  .link-btn { display: inline-flex; align-items: center; padding: 8px 16px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; color: var(--accent); font-size: 13px; font-family: var(--font-body); font-weight: 500; text-decoration: none; margin-right: 8px; margin-bottom: 8px; transition: all 0.2s ease; }
+  .link-btn:hover { background: var(--bg-hover); border-color: var(--accent); }
+  .link-btn svg { margin-left: 6px; }
+  .res-group { margin-bottom: 24px; }
+  .res-label { font-size: 13px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .final-tips p { margin-bottom: 10px; font-size: 13px; } .final-tips p:last-child { margin-bottom: 0; } .final-tips strong { color: var(--text-heading); }
+  .footer { border-top: 1px solid var(--bg-hover); padding: 24px 20px; text-align: center; font-size: 12px; color: var(--text-ghost); }
+  .comparison th { border-bottom-color: var(--border-light); color: var(--text-faint); }
+
+  /* SNAPSHOT */
+  .snapshot-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--text-faint); text-align: center; margin-bottom: 24px; font-weight: 600; }
+  .snapshot-wrap { display: flex; gap: 0; position: relative; margin-bottom: 28px; }
+  .snapshot-col { flex: 1; background: var(--bg-card); border: 1px solid var(--border-light); padding: 28px 24px; }
+  .snapshot-col:first-child { border-radius: 12px 0 0 12px; border-right: none; }
+  .snapshot-col:last-child { border-radius: 0 12px 12px 0; border-left: none; }
+  .snapshot-vs { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 42px; height: 42px; border-radius: 50%; background: #3d1a8f; border: 2px solid var(--border-light); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--text-faint); font-family: var(--font-heading); z-index: 2; }
+  .snapshot-col h3 { font-family: var(--font-heading); font-weight: 700; font-size: 20px; margin-bottom: 22px; }
+  .snapshot-col:first-child h3 { color: var(--purple); }
+  .snapshot-col:last-child h3 { color: var(--lime); }
+  .snap-row { padding: 14px 0; border-top: 1px solid var(--border); }
+  .snap-row:first-of-type { border-top: 1px solid var(--border-light); }
+  .snap-label { font-size: 12px; color: var(--text-faint); margin-bottom: 4px; }
+  .snap-value { font-size: 15px; font-weight: 700; font-family: var(--font-heading); }
+  .snapshot-col:first-child .snap-value { color: var(--purple); }
+  .snapshot-col:last-child .snap-value { color: var(--lime); }
+  @media (max-width: 560px) {
+    .snapshot-wrap { flex-direction: column; }
+    .snapshot-col:first-child { border-radius: 12px 12px 0 0; border-right: 1px solid var(--border-light); border-bottom: none; }
+    .snapshot-col:last-child { border-radius: 0 0 12px 12px; border-left: 1px solid var(--border-light); border-top: none; }
+    .snapshot-col { padding: 24px 20px; }
+  }
+
+  /* Q&A */
+  .qa-item { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+  .qa-question { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; background: none; border: none; color: var(--text-heading); font-size: 14px; font-family: var(--font-body); font-weight: 600; cursor: pointer; text-align: left; transition: color 0.2s; }
+  .qa-question:hover { color: var(--accent); }
+  .qa-question svg { flex-shrink: 0; transition: transform 0.3s; }
+  .qa-item.open .qa-question svg { transform: rotate(180deg); }
+  .qa-item.open .qa-question { color: var(--accent); }
+  .qa-answer { display: none; padding: 0 18px 16px; color: var(--text-dim); font-size: 14px; line-height: 1.75; white-space: pre-wrap; }
+  .qa-item.open .qa-answer { display: block; }
+  .qa-search { width: 100%; padding: 12px 16px; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 10px; color: var(--text-bright); font-size: 14px; font-family: var(--font-body); margin-bottom: 18px; outline: none; transition: border-color 0.2s; }
+  .qa-search:focus { border-color: var(--accent); }
+  .qa-search::placeholder { color: var(--text-faint); }
+  .admin-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text-faint); font-size: 12px; font-family: var(--font-body); cursor: pointer; margin-bottom: 20px; transition: all 0.2s; }
+  .admin-toggle:hover { border-color: var(--text-muted); color: var(--text-dim); }
+  .admin-toggle.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .admin-panel { display: none; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 22px; margin-bottom: 24px; }
+  .admin-panel.visible { display: block; }
+  .admin-panel h3 { font-size: 15px; font-weight: 700; color: var(--accent); font-family: var(--font-heading); margin-bottom: 16px; }
+  .admin-field { margin-bottom: 12px; }
+  .admin-field label { display: block; font-size: 12px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; font-weight: 600; }
+  .admin-field input, .admin-field textarea { width: 100%; padding: 10px 14px; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-bright); font-size: 14px; font-family: var(--font-body); outline: none; transition: border-color 0.2s; }
+  .admin-field input:focus, .admin-field textarea:focus { border-color: var(--accent); }
+  .admin-field textarea { min-height: 80px; resize: vertical; }
+  .admin-btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-family: var(--font-body); font-weight: 600; cursor: pointer; transition: all 0.2s; margin-right: 8px; }
+  .admin-btn-primary { background: var(--accent); color: #0c1017; }
+  .admin-btn-primary:hover { background: #00c889; }
+  .admin-btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+  .admin-btn-danger:hover { background: rgba(255,107,107,0.1); }
+  .admin-btn-ghost { background: transparent; color: var(--text-faint); border: 1px solid var(--border); }
+  .admin-list-item { display: flex; align-items: flex-start; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .admin-list-item:last-child { border-bottom: none; }
+  .admin-list-q { color: var(--text-heading); font-weight: 600; font-size: 13px; flex: 1; margin-right: 12px; }
+  .admin-list-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .admin-list-actions button { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-faint); font-size: 11px; font-family: var(--font-body); cursor: pointer; transition: all 0.2s; }
+  .admin-list-actions button:hover { border-color: var(--text-muted); color: var(--text-dim); }
+  .admin-list-actions button.del:hover { border-color: var(--danger); color: var(--danger); }
+  .login-overlay { display: none; position: fixed; inset: 0; background: rgba(15,5,50,0.85); z-index: 100; align-items: center; justify-content: center; }
+  .login-overlay.visible { display: flex; }
+  .login-box { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 32px; width: 340px; max-width: 90vw; text-align: center; }
+  .login-box h3 { font-family: var(--font-heading); color: var(--text-bright); font-size: 18px; margin-bottom: 6px; }
+  .login-box p { font-size: 13px; color: var(--text-faint); margin-bottom: 18px; }
+  .login-box input { width: 100%; padding: 10px 14px; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-bright); font-size: 14px; font-family: var(--font-body); outline: none; margin-bottom: 14px; text-align: center; }
+  .login-box input:focus { border-color: var(--accent); }
+  .login-error { color: var(--danger); font-size: 12px; margin-bottom: 10px; display: none; }
+  @media (max-width: 600px) { .gloss-item { flex-direction: column; } .gloss-term { margin-bottom: 4px; min-width: unset; } }
+</style>
+</head>
+<body>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h3>Admin Login</h3>
+    <p>Enter the admin password to manage Q&amp;A</p>
+    <input type="password" id="loginInput" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="login-error" id="loginError">Incorrect password. Try again.</div>
+    <button class="admin-btn admin-btn-primary" onclick="doLogin()" style="width:100%;margin:0 0 8px;">Log In</button>
+    <button class="admin-btn admin-btn-ghost" onclick="closeLogin()" style="width:100%;">Cancel</button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-label">The5ers Futures</div>
+  <h1>New Trader<br><span>Startup Guide</span></h1>
+  <p>Everything you need to know to go from zero to your first futures trade — from the basics of contracts to setting up your BlackArrow platform.</p>
+</div>
+
+<div class="nav" id="nav"></div>
+
+<div class="content">
+
+  <div class="section active" id="sec-welcome">
+    <h2>Welcome to Futures Trading</h2>
+    <p>If you're reading this, you've probably been trading CFDs (or maybe you're brand new to trading entirely). Either way, futures can feel overwhelming at first — different terminology, tick values, contract expirations, and a whole new platform. This guide breaks it all down step by step so you can focus on what matters: trading well.</p>
+    <div class="card">
+      <div class="card-label">Your Quick-Start Checklist</div>
+      <div class="step-item"><span class="step-num">1</span><span>Read this guide — you're doing it now! ✓</span></div>
+      <div class="step-item"><span class="step-num">2</span><span>Watch the <a class="step-link-ext" href="https://www.youtube.com/playlist?list=PLX8kurx7P12pFKDS3ljRao6MGujDMLw2A" target="_blank">BlackArrow Startup Video Guides</a></span></div>
+      <div class="step-item"><span class="step-num">3</span><span>Download &amp; set up <a class="step-link-ext" href="https://blackarrowtrading.zendesk.com/hc/en-us" target="_blank">BlackArrow platform</a></span></div>
+      <div class="step-item"><span class="step-num">4</span><span>Learn the difference between <a class="step-link" onclick="switchSection('contractSizes')">contract sizes (Micro vs E-mini)</a></span></div>
+      <div class="step-item"><span class="step-num">5</span><span>Understand The5ers <a class="step-link" onclick="switchSection('rules')">evaluation rules</a> — 6% target, 3% max DD, 30% consistency</span></div>
+      <div class="step-item"><span class="step-num">6</span><span>Start trading with <a class="step-link" onclick="switchSection('instruments')">Micro contracts</a> to manage risk</span></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-whatAreFutures">
+    <h2>What Are Futures?</h2>
+    <p>A futures contract is a standardized agreement to buy or sell a specific asset (like the S&amp;P 500 index, gold, or crude oil) at a predetermined price on a set date in the future. These contracts trade on regulated exchanges like the CME (Chicago Mercantile Exchange) and COMEX.</p>
+    <div class="accordion open" data-acc><button class="accordion-btn" onclick="toggleAcc(this)">How are futures different from stocks?<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="accordion-body"><p>When you buy a stock, you own a piece of a company. With futures, you don't own anything — you're entering a contract based on the future price of an asset. Futures use leverage, meaning you only need a fraction of the full contract value (called "margin") to open a position. This makes them powerful but also risky if you don't manage your size properly.</p></div></div>
+    <div class="accordion" data-acc><button class="accordion-btn" onclick="toggleAcc(this)">What does 'expiration' mean?<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="accordion-body"><p>Every futures contract has an expiration date. For example, ESH26 is the E-mini S&amp;P 500 contract expiring in March 2026. The letter codes are: H = March, M = June, U = September, Z = December. When a contract nears expiration, you "roll" to the next one. On BlackArrow, you can use "continuous" tickers (like ESFUT) that automatically handle this for you.</p></div></div>
+    <div class="accordion" data-acc><button class="accordion-btn" onclick="toggleAcc(this)">What are ticks and tick value?<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="accordion-body"><p>A "tick" is the smallest price movement of a futures contract. Each tick has a fixed dollar value. For example, the E-mini S&amp;P 500 (ES) moves in increments of 0.25 points, and each tick is worth $12.50. So if ES moves from 5000.00 to 5001.00, that's 4 ticks = $50 per contract. Understanding tick value is essential for calculating your risk per trade.</p></div></div>
+    <div class="accordion" data-acc><button class="accordion-btn" onclick="toggleAcc(this)">Why trade futures instead of CFDs?<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="accordion-body"><p>Futures trade on regulated exchanges with transparent pricing — there's no broker spread manipulation. You get real market depth, true volume data, and tighter execution. The cost structure is also transparent: you pay a fixed commission per contract, not a spread. This tends to be cheaper for active traders and allows for more precise risk management.</p></div></div>
+  </div>
+
+  <div class="section" id="sec-contractSizes">
+    <h2>Contract Sizes: Full, E-Mini &amp; Micro</h2>
+    <p>Futures come in different sizes. Think of it like buying eggs — you can get a full crate, a half-dozen, or a single egg. Same product, different quantity and risk.</p>
+    <div class="table-wrap"><table><thead><tr><th>Contract Type</th><th>Example</th><th>Tick Size</th><th>Tick Value</th><th>Multiplier</th><th>Notes</th></tr></thead><tbody>
+      <tr><td class="bright">Full (Standard)</td><td class="mono">ES (S&amp;P 500)</td><td>0.25</td><td class="accent">$12.50</td><td>50</td><td class="note">Large capital needed. Not available at The5ers.</td></tr>
+      <tr><td class="bright">E-Mini</td><td class="mono">ES (E-mini S&amp;P)</td><td>0.25</td><td class="accent">$12.50</td><td>50</td><td class="note">Most popular size. $5 commission round turn.</td></tr>
+      <tr><td class="bright">Micro</td><td class="mono">MES (Micro S&amp;P)</td><td>0.25</td><td class="accent">$1.25</td><td>5</td><td class="note">1/10th of E-mini. Great for beginners. $2.50 commission.</td></tr>
+    </tbody></table></div>
+    <div class="tip-box"><div class="tip-label">💡 Beginner Tip</div><p>Start with <strong>Micro contracts</strong> (MES, MNQ, MYM, M2K). They're 1/10th the size of E-minis, so a 4-tick move on MES is only $5 instead of $50. This lets you practice real futures trading with controlled risk while you learn the platform and develop your strategy.</p></div>
+  </div>
+
+  <div class="section" id="sec-cfdVsFutures">
+    <h2>CFD Lots &amp; Pips vs. Futures Contracts &amp; Ticks</h2>
+    <p>If you're coming from CFD/Forex trading, the biggest mental shift is how position sizing and price movements work. Here's a side-by-side breakdown:</p>
+    <div class="table-wrap"><table class="comparison"><thead><tr><th class="subtle">Concept</th><th class="subtle">CFD / Forex</th><th class="subtle">Futures</th></tr></thead><tbody>
+      <tr><td class="bright">Position Size</td><td>Lots (1.0, 0.1, 0.01)</td><td class="accent">Contracts (1, 2, 3…)</td></tr>
+      <tr><td class="bright">Smallest Move</td><td>Pip (e.g. 0.0001 on EUR/USD)</td><td class="accent">Tick (e.g. 0.25 on ES)</td></tr>
+      <tr><td class="bright">Value per Move</td><td>Depends on lot size ($10/pip for 1.0 lot EUR/USD)</td><td class="accent">Fixed per contract ($12.50/tick on ES)</td></tr>
+      <tr><td class="bright">Cost to Trade</td><td>Spread (variable, hidden in price)</td><td class="accent">Commission (fixed, transparent)</td></tr>
+      <tr><td class="bright">Price Source</td><td>Broker's price feed (may vary)</td><td class="accent">Exchange (CME) — same for everyone</td></tr>
+      <tr><td class="bright">Scaling Down</td><td>Use smaller lot sizes (0.01)</td><td class="accent">Use Micro contracts (MES instead of ES)</td></tr>
+      <tr><td class="bright">Expiration</td><td>No expiration</td><td class="accent">Quarterly (roll to next contract)</td></tr>
+    </tbody></table></div>
+    <div class="card" style="margin-top:20px;"><div class="card-label" style="color:var(--accent);">Quick Example</div><p style="margin:0;">In Forex CFDs, if you go long 0.1 lots on EUR/USD and it moves 10 pips in your favor, you make $10. In futures, if you go long 1 MES (Micro S&amp;P 500) contract and the price moves 4 ticks (1 point) in your favor, you make $5. The key difference is that in futures, the dollar value per tick is <strong>fixed</strong> — it doesn't change based on position size. You scale by adding more contracts.</p></div>
+  </div>
+
+  <div class="section" id="sec-programs">
+    <h2>The5ers Evaluation Programs</h2>
+    <p>The5ers offers two paths to get funded. Both have the same trading objectives — they differ in fee structure and how commissions work.</p>
+    <div class="snapshot-title">Side-by-Side Snapshot</div>
+    <div class="snapshot-wrap">
+      <div class="snapshot-col">
+        <h3>Basecamp</h3>
+        <div class="snap-row"><div class="snap-label">Entry cost — $25K account</div><div class="snap-value">$50 upfront only</div></div>
+        <div class="snap-row"><div class="snap-label">Entry cost — $50K account</div><div class="snap-value">$100 upfront only</div></div>
+        <div class="snap-row"><div class="snap-label">On passing evaluation</div><div class="snap-value">$70 / $140 activation</div></div>
+        <div class="snap-row"><div class="snap-label">Commissions</div><div class="snap-value">Full — not returned</div></div>
+        <div class="snap-row"><div class="snap-label">Total paid if you pass ($25K)</div><div class="snap-value">$120 total</div></div>
+      </div>
+      <div class="snapshot-vs">vs</div>
+      <div class="snapshot-col">
+        <h3>Rebate</h3>
+        <div class="snap-row"><div class="snap-label">Entry cost — $25K account</div><div class="snap-value">$150 upfront</div></div>
+        <div class="snap-row"><div class="snap-label">Entry cost — $50K account</div><div class="snap-value">$300 upfront</div></div>
+        <div class="snap-row"><div class="snap-label">On passing evaluation</div><div class="snap-value">No activation fee</div></div>
+        <div class="snap-row"><div class="snap-label">Commissions</div><div class="snap-value">100% rebated daily</div></div>
+        <div class="snap-row"><div class="snap-label">Total paid if you pass ($25K)</div><div class="snap-value">$150 total</div></div>
+      </div>
+    </div>
+    <div style="font-size:14px;font-weight:600;color:var(--text-heading);margin-bottom:14px;">Shared Objectives (Both Programs):</div>
+    <div class="info-row">
+      <div class="info-card"><div class="label">Profit Target</div><div class="value">6%</div><div class="sub">of account balance</div></div>
+      <div class="info-card"><div class="label">Max Drawdown</div><div class="value">3%</div><div class="sub">don't exceed this</div></div>
+      <div class="info-card"><div class="label">Consistency Rule</div><div class="value">30%</div><div class="sub">no single day &gt; 30% of total profit</div></div>
+    </div>
+    <a class="link-btn" href="https://futures-help.the5ers.com/the5ers-futures-evalution-programs-explained/" target="_blank">Full Program Details<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="link-btn" href="https://futures-help.the5ers.com/futures/" target="_blank">Complete Knowledge Base<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </div>
+
+  <div class="section" id="sec-instruments">
+    <h2>Available Instruments</h2>
+    <p>The5ers Futures offers a wide range of markets across equity indices, currencies, metals, energy, and agriculture. Here are the most popular ones to get started with:</p>
+    <div class="table-wrap"><table><thead><tr><th>Symbol</th><th>Market</th><th>Type</th><th>BlackArrow Ticker</th><th>Tick Value</th></tr></thead><tbody>
+      <tr><td class="mono-accent">ES / MES</td><td class="bright">S&amp;P 500</td><td>E-mini / Micro</td><td class="mono">ESFUT / MESFUT</td><td>$12.50 / $1.25</td></tr>
+      <tr><td class="mono-accent">NQ / MNQ</td><td class="bright">Nasdaq 100</td><td>E-mini / Micro</td><td class="mono">NQFUT / MNQFUT</td><td>$5.00 / $0.50</td></tr>
+      <tr><td class="mono-accent">YM / MYM</td><td class="bright">Dow Jones</td><td>E-mini / Micro</td><td class="mono">YMFUT / MYMFUT</td><td>$5.00 / $0.50</td></tr>
+      <tr><td class="mono-accent">GC / MGC</td><td class="bright">Gold</td><td>Standard / Micro</td><td class="mono">GCFUT / MGCFUT</td><td>$10.00 / $1.00</td></tr>
+      <tr><td class="mono-accent">CL</td><td class="bright">Crude Oil</td><td>Standard</td><td class="mono">CLFUT</td><td>$10.00</td></tr>
+      <tr><td class="mono-accent">6E / M6E</td><td class="bright">Euro FX</td><td>Standard / Micro</td><td class="mono">6EFUT / M6EFUT</td><td>$6.25 / $1.25</td></tr>
+    </tbody></table></div>
+    <p>On BlackArrow, each instrument has two ticker formats: a <strong style="color:var(--text-heading)">continuous ticker</strong> (e.g. ESFUT) that auto-rolls between contract months, and a <strong style="color:var(--text-heading)">specific contract ticker</strong> with the expiration code (e.g. ESH26 for March 2026). For most traders, using the continuous ticker is simplest.</p>
+    <a class="link-btn" href="https://futures-help.the5ers.com/trading-instruments/" target="_blank">Full Instrument List<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </div>
+
+  <div class="section" id="sec-commissions">
+    <h2>Commissions &amp; Contract Symbols</h2>
+    <p>Futures commissions are simple and transparent — a fixed fee per "round turn" (opening + closing a position).</p>
+    <div class="info-row">
+      <div class="info-card"><div class="label">Standard Contracts</div><div class="value">$5.00</div><div class="sub">per round turn</div></div>
+      <div class="info-card"><div class="label">Micro Contracts</div><div class="value">$2.50</div><div class="sub">per round turn</div></div>
+    </div>
+    <div class="accordion open" data-acc><button class="accordion-btn" onclick="toggleAcc(this)">Understanding Contract Month Codes<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="accordion-body">
+      <p style="margin-bottom:10px;">Every futures contract has a month code appended to the symbol. The main quarterly months for equity indices are highlighted below:</p>
+      <div class="month-grid">
+        <div class="month-cell"><div class="code">F</div><div class="name">Jan</div></div>
+        <div class="month-cell"><div class="code">G</div><div class="name">Feb</div></div>
+        <div class="month-cell quarterly"><div class="code">H</div><div class="name">Mar</div></div>
+        <div class="month-cell"><div class="code">J</div><div class="name">Apr</div></div>
+        <div class="month-cell"><div class="code">K</div><div class="name">May</div></div>
+        <div class="month-cell quarterly"><div class="code">M</div><div class="name">Jun</div></div>
+        <div class="month-cell"><div class="code">N</div><div class="name">Jul</div></div>
+        <div class="month-cell"><div class="code">Q</div><div class="name">Aug</div></div>
+        <div class="month-cell quarterly"><div class="code">U</div><div class="name">Sep</div></div>
+        <div class="month-cell"><div class="code">V</div><div class="name">Oct</div></div>
+        <div class="month-cell"><div class="code">X</div><div class="name">Nov</div></div>
+        <div class="month-cell quarterly"><div class="code">Z</div><div class="name">Dec</div></div>
+      </div>
+      <p style="font-size:12px;color:var(--text-faint);margin-top:8px;">Green-highlighted months (H, M, U, Z) are the standard quarterly expiration months for index futures. So ESH26 = E-mini S&amp;P, March 2026.</p>
+    </div></div>
+    <a class="link-btn" href="https://futures-help.the5ers.com/futures-trading-commissions-contracts-2026/" target="_blank">Full 2026 Commission &amp; Contract List<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </div>
+
+  <div class="section" id="sec-platform">
+    <h2>The BlackArrow Platform</h2>
+    <p>BlackArrow is a professional-grade trading platform built by Nelogica. It's designed for speed, customization, and powerful automation.</p>
+    <div class="accordion open" data-acc><button class="accordion-btn" onclick="toggleAcc(this)">Key Features<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="accordion-body"><p>BlackArrow includes chart trading (place orders directly from charts), 100+ technical indicators, smart order types (OCO, auto-breakeven, trailing stops), a strategy editor for building automated bots, a built-in replay/simulator for practice, and real-time market data. It's available on desktop and mobile.</p></div></div>
+    <div class="accordion" data-acc><button class="accordion-btn" onclick="toggleAcc(this)">Getting Set Up<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="accordion-body"><p>After purchasing your evaluation from The5ers, you'll receive credentials to access BlackArrow. Download it from the BlackArrow website, log in, and connect to your account. The best way to learn the platform is to watch the official startup video guides.</p></div></div>
+    <div class="accordion" data-acc><button class="accordion-btn" onclick="toggleAcc(this)">Using the Simulator<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="accordion-body"><p>Before you risk real capital on your evaluation, use BlackArrow's built-in simulator. It runs on live market data with no delay, so it feels like the real thing. Practice placing orders, setting stops, and getting comfortable with the interface.</p></div></div>
+    <div style="margin-top:16px;">
+      <a class="link-btn" href="https://www.youtube.com/playlist?list=PLX8kurx7P12pFKDS3ljRao6MGujDMLw2A" target="_blank">BlackArrow Startup Video Guides<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="link-btn" href="https://blackarrowtrading.zendesk.com/hc/en-us" target="_blank">BlackArrow FAQ &amp; Help Center<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+  </div>
+
+  <div class="section" id="sec-rules">
+    <h2>Key Rules to Know</h2>
+    <p>Breaking these rules will fail your evaluation. Read them carefully and plan your trading around them.</p>
+    <div class="alert alert-danger"><h4>⚠️ Maximum Drawdown: 3%</h4><p>Your account cannot lose more than 3% from its highest balance. This is the hard limit — if you hit it, the evaluation ends. Calculate your risk per trade carefully.</p></div>
+    <div class="alert alert-warn"><h4>📊 Consistency Rule: 30%</h4><p>No single trading day can account for more than 30% of your total profits. This prevents "all or nothing" gambling. Trade consistently across multiple days.</p></div>
+    <div class="alert alert-success"><h4>🎯 Profit Target: 6%</h4><p>Reach 6% profit on your account balance to pass the evaluation. Take your time — there's no time limit. Consistency and risk management matter more than speed.</p></div>
+    <a class="link-btn" href="https://futures-help.the5ers.com/futures/" target="_blank" style="margin-top:8px;">See All Rules in Knowledge Base<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </div>
+
+  <div class="section" id="sec-glossary">
+    <h2>Futures Glossary</h2>
+    <p>Quick reference for terminology you'll encounter.</p>
+    <div class="gloss-item"><div class="gloss-term">Tick</div><div class="gloss-def">The smallest price increment a contract can move. Example: ES moves in 0.25 increments.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Tick Value</div><div class="gloss-def">The dollar amount you gain or lose per tick, per contract. ES = $12.50/tick, MES = $1.25/tick.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Point</div><div class="gloss-def">Usually equals 4 ticks on index futures. A 1-point move on ES = 4 × $12.50 = $50.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Contract</div><div class="gloss-def">One unit of a futures instrument. You buy/sell in whole contracts (1, 2, 3…), not fractional lots.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Round Turn</div><div class="gloss-def">A complete trade — opening and closing a position. Commission is quoted per round turn.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Roll / Rollover</div><div class="gloss-def">Moving your position from an expiring contract to the next active one.</div></div>
+    <div class="gloss-item"><div class="gloss-term">CME</div><div class="gloss-def">Chicago Mercantile Exchange — the main exchange where most futures are traded.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Margin</div><div class="gloss-def">The deposit required to hold a futures position. Not a loan — it's collateral.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Drawdown</div><div class="gloss-def">The decline from your account's highest point. At The5ers, max allowed is 3%.</div></div>
+    <div class="gloss-item"><div class="gloss-term">OCO Order</div><div class="gloss-def">One-Cancels-Other — a bracket order where your stop-loss and take-profit are linked.</div></div>
+    <div class="gloss-item"><div class="gloss-term">Continuous Ticker</div><div class="gloss-def">A symbol (like ESFUT) that automatically rolls to the next contract when the current one expires.</div></div>
+  </div>
+
+  <div class="section" id="sec-qa">
+    <h2>Common Questions &amp; Answers</h2>
+    <p>Frequently asked questions from the community. Use the search bar to find what you need quickly.</p>
+    <input type="text" class="qa-search" id="qaSearch" placeholder="Search questions..." oninput="filterQA()">
+    <button class="admin-toggle" id="adminToggle" onclick="handleAdminToggle()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.75V3.5M7 10.5V12.25M2.84 4.34L4.08 5.58M9.92 8.42L11.16 9.66M1.75 7H3.5M10.5 7H12.25M2.84 9.66L4.08 8.42M9.92 5.58L11.16 4.34" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Admin
+    </button>
+    <div class="admin-panel" id="adminPanel">
+      <h3>Manage Q&amp;A</h3>
+      <div class="admin-field"><label>Question</label><input type="text" id="adminQ" placeholder="e.g. Can I hold positions overnight?"></div>
+      <div class="admin-field"><label>Answer</label><textarea id="adminA" placeholder="Type the answer here..."></textarea></div>
+      <div style="margin-bottom:20px;">
+        <button class="admin-btn admin-btn-primary" onclick="saveQA()">Add Q&amp;A</button>
+        <button class="admin-btn admin-btn-ghost" id="cancelEditBtn" style="display:none;" onclick="cancelEdit()">Cancel Edit</button>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:var(--text-faint);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em;">Existing Q&amp;A</div>
+      <div id="adminList"></div>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);"><button class="admin-btn admin-btn-danger" onclick="logoutAdmin()">Log Out</button></div>
+    </div>
+    <div id="qaList"></div>
+    <div id="qaEmpty" style="display:none;text-align:center;padding:30px;color:var(--text-faint);font-size:14px;">No questions match your search.</div>
+  </div>
+
+  <div class="section" id="sec-resources">
+    <h2>Resources &amp; Links</h2>
+    <p>Everything you need, organized by topic.</p>
+    <div class="res-group"><div class="res-label">Platform Setup</div>
+      <a class="link-btn" href="https://www.youtube.com/playlist?list=PLX8kurx7P12pFKDS3ljRao6MGujDMLw2A" target="_blank">BlackArrow Startup Video Guides<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="link-btn" href="https://blackarrowtrading.zendesk.com/hc/en-us" target="_blank">BlackArrow FAQ &amp; Help Center<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+    <div class="res-group"><div class="res-label">The5ers Knowledge Base</div>
+      <a class="link-btn" href="https://futures-help.the5ers.com/futures/" target="_blank">Complete Futures Help Center<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="link-btn" href="https://futures-help.the5ers.com/the5ers-futures-evalution-programs-explained/" target="_blank">Evaluation Programs Explained<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="link-btn" href="https://futures-help.the5ers.com/trading-instruments/" target="_blank">All Available Instruments<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="link-btn" href="https://futures-help.the5ers.com/futures-trading-commissions-contracts-2026/" target="_blank">2026 Commissions &amp; Contracts<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+    <div class="res-group"><div class="res-label">Video Content &amp; Live Streams</div>
+      <a class="link-btn" href="https://www.youtube.com/@The5ersFutures" target="_blank">The5ers Futures YouTube Channel<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7.667V11.667C11 12.02 10.86 12.36 10.61 12.61C10.36 12.86 10.02 13 9.667 13H2.333C1.98 13 1.64 12.86 1.39 12.61C1.14 12.36 1 12.02 1 11.667V4.333C1 3.98 1.14 3.64 1.39 3.39C1.64 3.14 1.98 3 2.333 3H6.333M9 1H13M13 1V5M13 1L5.667 8.333" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+    <div class="card final-tips" style="margin-top:8px;">
+      <div style="font-size:14px;font-weight:600;color:var(--text-heading);margin-bottom:14px;">🧠 Final Tips for Your First Week</div>
+      <p><strong>Don't rush.</strong> Spend at least a few days on the simulator getting comfortable with BlackArrow before placing real trades on your evaluation.</p>
+      <p><strong>Trade small.</strong> Start with 1 Micro contract. You can always scale up once you're consistent.</p>
+      <p><strong>Know your tick value.</strong> Before every trade, know exactly how much each tick costs you. This is your foundation for risk management.</p>
+      <p><strong>Always use a stop-loss.</strong> Futures move fast. An unprotected position can blow through your 3% drawdown limit in minutes on a volatile day.</p>
+      <p><strong>Watch the live streams.</strong> The5ers Futures YouTube channel has regular live trading and educational content. Real-time learning is invaluable.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">The5ers Futures — New Trader Startup Guide</div>
+
+<script>
+// Password is stored as SHA-256 hash — never visible in source code
+// Default password: the5ers2026 — to change, generate a new hash at https://emn178.github.io/online-tools/sha256.html
+const ADMIN_HASH = '0795174eebbbf9ffa569f577c8575d4da2ef2572d16c4a895292f50f2cccd9e5';
+async function hashPassword(pw) {
+  const encoded = new TextEncoder().encode(pw);
+  const buffer = await crypto.subtle.digest('SHA-256', encoded);
+  return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+const sectionMap = [
+  ['welcome','Welcome'],['whatAreFutures','What Are Futures?'],['contractSizes','Contract Sizes'],
+  ['cfdVsFutures','CFD vs Futures'],['programs','Evaluation Programs'],['instruments','Instruments'],
+  ['commissions','Commissions & Symbols'],['platform','BlackArrow Platform'],['rules','Key Rules'],
+  ['glossary','Glossary'],['qa','Q&A'],['resources','Resources & Links']
+];
+const nav = document.getElementById('nav');
+sectionMap.forEach(([id, label]) => {
+  const btn = document.createElement('button');
+  btn.className = 'nav-btn' + (id === 'welcome' ? ' active' : '');
+  btn.textContent = label;
+  btn.dataset.target = id;
+  btn.addEventListener('click', () => switchSection(id));
+  nav.appendChild(btn);
+});
+function switchSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.target === id));
+  window.scrollTo({ top: 200, behavior: 'smooth' });
+}
+function toggleAcc(btn) { btn.parentElement.classList.toggle('open'); }
+
+const QA_KEY = 'the5ers_qa_data';
+let qaData = [], editingIndex = -1, isAdmin = false;
+function loadQA() {
+  try { const r = localStorage.getItem(QA_KEY); qaData = r ? JSON.parse(r) : getDefaultQA(); if (!r) saveQAData(); } catch(e) { qaData = getDefaultQA(); }
+}
+function saveQAData() { localStorage.setItem(QA_KEY, JSON.stringify(qaData)); }
+function getDefaultQA() {
+  return [
+    { q: "Can I hold positions overnight?", a: "Check The5ers overnight holding rules in the knowledge base. Some instruments have restrictions or additional margin requirements for overnight positions." },
+    { q: "What happens if I hit the 3% drawdown limit?", a: "Your evaluation ends immediately. The account is closed and you would need to purchase a new evaluation to try again. This is why risk management and proper position sizing are critical." },
+    { q: "Can I trade during high-impact news events?", a: "Yes, news trading is allowed at The5ers Futures. However, be aware that volatility spikes dramatically during news events. Slippage can occur and stops may fill at worse prices than expected. Trade smaller during news if you're new." },
+    { q: "How does the 30% consistency rule work exactly?", a: "If your total profit at the end of your evaluation is $1,000, no single trading day can have contributed more than $300 (30%) of that total. This encourages steady, consistent trading rather than relying on one lucky day." },
+    { q: "What's the difference between ESFUT and ESH26?", a: "ESFUT is a continuous ticker that automatically rolls to the next active contract — you never need to think about expiration. ESH26 is the specific March 2026 contract that will expire. Most traders should use the continuous (FUT) tickers for simplicity." },
+    { q: "Do I need to pay for market data separately?", a: "Market data requirements depend on your BlackArrow plan. Check the BlackArrow FAQ and your specific The5ers account setup for details on what's included." }
+  ];
+}
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function renderQA() {
+  const list = document.getElementById('qaList');
+  const search = document.getElementById('qaSearch').value.toLowerCase();
+  const filtered = qaData.filter(item => item.q.toLowerCase().includes(search) || item.a.toLowerCase().includes(search));
+  document.getElementById('qaEmpty').style.display = filtered.length === 0 ? 'block' : 'none';
+  list.innerHTML = filtered.map(item => {
+    return '<div class="qa-item"><button class="qa-question" onclick="this.parentElement.classList.toggle(\'open\')">' + escHtml(item.q) + '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="qa-answer">' + escHtml(item.a) + '</div></div>';
+  }).join('');
+}
+function filterQA() { renderQA(); }
+function renderAdminList() {
+  const list = document.getElementById('adminList');
+  list.innerHTML = qaData.map((item, i) =>
+    '<div class="admin-list-item"><div class="admin-list-q">' + escHtml(item.q) + '</div><div class="admin-list-actions"><button onclick="editQA(' + i + ')">Edit</button><button class="del" onclick="deleteQA(' + i + ')">Delete</button></div></div>'
+  ).join('');
+}
+function saveQA() {
+  const q = document.getElementById('adminQ').value.trim();
+  const a = document.getElementById('adminA').value.trim();
+  if (!q || !a) return;
+  if (editingIndex >= 0) { qaData[editingIndex] = { q, a }; editingIndex = -1; document.getElementById('cancelEditBtn').style.display = 'none'; }
+  else { qaData.push({ q, a }); }
+  saveQAData(); document.getElementById('adminQ').value = ''; document.getElementById('adminA').value = '';
+  renderQA(); renderAdminList();
+}
+function editQA(i) {
+  editingIndex = i; document.getElementById('adminQ').value = qaData[i].q; document.getElementById('adminA').value = qaData[i].a;
+  document.getElementById('cancelEditBtn').style.display = 'inline-block'; document.getElementById('adminQ').focus();
+}
+function cancelEdit() { editingIndex = -1; document.getElementById('adminQ').value = ''; document.getElementById('adminA').value = ''; document.getElementById('cancelEditBtn').style.display = 'none'; }
+function deleteQA(i) { if (confirm('Delete this Q&A?\n\n"' + qaData[i].q + '"')) { qaData.splice(i, 1); saveQAData(); renderQA(); renderAdminList(); } }
+function handleAdminToggle() {
+  if (isAdmin) { document.getElementById('adminPanel').classList.toggle('visible'); document.getElementById('adminToggle').classList.toggle('active'); }
+  else { document.getElementById('loginOverlay').classList.add('visible'); document.getElementById('loginInput').value = ''; document.getElementById('loginError').style.display = 'none'; setTimeout(() => document.getElementById('loginInput').focus(), 100); }
+}
+async function doLogin() {
+  const inputHash = await hashPassword(document.getElementById('loginInput').value);
+  if (inputHash === ADMIN_HASH) { isAdmin = true; closeLogin(); document.getElementById('adminPanel').classList.add('visible'); document.getElementById('adminToggle').classList.add('active'); renderAdminList(); }
+  else { document.getElementById('loginError').style.display = 'block'; document.getElementById('loginInput').value = ''; document.getElementById('loginInput').focus(); }
+}
+function closeLogin() { document.getElementById('loginOverlay').classList.remove('visible'); }
+function logoutAdmin() { isAdmin = false; document.getElementById('adminPanel').classList.remove('visible'); document.getElementById('adminToggle').classList.remove('active'); cancelEdit(); }
+loadQA(); renderQA();
+</script>
+</body>
+</html>
