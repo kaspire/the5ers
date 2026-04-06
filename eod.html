@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EOD Trailing Drawdown 3% — $25K Futures Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #07090c;
+    --bg1:      #0c1018;
+    --bg2:      #101620;
+    --border:   #1c2a3a;
+    --border2:  #243040;
+    --green:    #00d68f;
+    --green2:   #009960;
+    --green-bg: rgba(0,214,143,0.07);
+    --red:      #ff3a5c;
+    --red2:     #c02040;
+    --red-bg:   rgba(255,58,92,0.08);
+    --amber:    #f5a623;
+    --amber2:   #c07800;
+    --amber-bg: rgba(245,166,35,0.08);
+    --blue:     #4db8ff;
+    --text:     #b8cce0;
+    --muted:    #3d5570;
+    --white:    #e8f0f8;
+    --display:  'Bebas Neue', sans-serif;
+    --mono:     'IBM Plex Mono', monospace;
+    --cond:     'IBM Plex Sans Condensed', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.18) 3px, rgba(0,0,0,0.18) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: var(--bg1);
+    border-bottom: 1px solid var(--border);
+    padding: 52px 48px 44px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.6s ease both;
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.35;
+  }
+
+  .hero-glow {
+    position: absolute; top: -120px; right: -80px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(77,184,255,0.08) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-inner { position: relative; max-width: 1040px; margin: 0 auto; }
+
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 10px; letter-spacing: 3px; color: var(--blue);
+    border: 1px solid #1a4a70; padding: 4px 12px; margin-bottom: 18px;
+    text-transform: uppercase;
+  }
+
+  .hero-tag .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--blue);
+    animation: pulse 1.4s infinite;
+  }
+
+  .hero h1 {
+    font-family: var(--display);
+    font-size: clamp(52px, 8.5vw, 104px);
+    line-height: 0.9; letter-spacing: 1px;
+    color: var(--white); text-transform: uppercase;
+  }
+
+  .hero h1 em  { color: var(--blue); font-style: normal; }
+  .hero h1 .pct { color: var(--red); }
+  .hero h1 .acct { color: var(--amber); }
+
+  .hero-sub {
+    font-family: var(--cond); font-size: 16px; font-weight: 300;
+    letter-spacing: 5px; color: var(--muted); text-transform: uppercase; margin-top: 10px;
+  }
+
+  .hero-meta { display: flex; gap: 32px; margin-top: 30px; flex-wrap: wrap; }
+
+  .hero-stat { display: flex; flex-direction: column; gap: 4px; }
+  .hero-stat-label { font-size: 9px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
+  .hero-stat-value { font-family: var(--display); font-size: 28px; color: var(--white); }
+  .hero-stat-value.green  { color: var(--green); }
+  .hero-stat-value.red    { color: var(--red); }
+  .hero-stat-value.amber  { color: var(--amber); }
+  .hero-stat-value.blue   { color: var(--blue); }
+
+  /* ─── ACCOUNT CALLOUT ─── */
+  .acct-banner {
+    background: rgba(77,184,255,0.06);
+    border: 1px solid #1a4a70;
+    border-left: 4px solid var(--blue);
+    padding: 14px 24px;
+    display: flex; gap: 40px; flex-wrap: wrap; align-items: center;
+    margin-bottom: 28px;
+    animation: fadeUp 0.5s 0.05s ease both;
+  }
+
+  .acct-stat { display: flex; flex-direction: column; gap: 3px; }
+  .acct-stat-label { font-size: 9px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
+  .acct-stat-value { font-family: var(--display); font-size: 26px; }
+  .acct-stat-value.blue   { color: var(--blue); }
+  .acct-stat-value.red    { color: var(--red); }
+  .acct-stat-value.amber  { color: var(--amber); }
+  .acct-stat-value.green  { color: var(--green); }
+
+  /* ─── MAIN ─── */
+  .main { max-width: 1040px; margin: 0 auto; padding: 0 48px; }
+
+  .sec-head {
+    display: flex; align-items: center; gap: 12px;
+    margin: 48px 0 16px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .sec-num {
+    font-size: 11px; letter-spacing: 2px; color: var(--blue);
+    background: rgba(77,184,255,0.08); border: 1px solid #1a4a70;
+    padding: 2px 8px;
+  }
+
+  .sec-title { font-family: var(--display); font-size: 22px; letter-spacing: 3px; color: var(--text); text-transform: uppercase; }
+  .sec-line  { flex: 1; height: 1px; background: var(--border); }
+
+  /* ─── DEFINITION ─── */
+  .definition {
+    background: var(--bg1); border: 1px solid var(--border);
+    border-left: 3px solid var(--blue); padding: 20px 24px;
+    margin-bottom: 28px; animation: fadeUp 0.5s 0.1s ease both;
+  }
+
+  .definition p { font-family: var(--cond); font-size: 15px; line-height: 1.6; color: var(--text); font-weight: 300; }
+  .definition strong { color: var(--blue); font-weight: 600; }
+  .definition .r { color: var(--red); font-weight: 600; }
+  .definition .a { color: var(--amber); font-weight: 600; }
+
+  /* ─── KEY NUMBERS ─── */
+  .key-numbers {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--border); border: 1px solid var(--border);
+    margin-bottom: 40px; animation: fadeUp 0.5s 0.15s ease both;
+  }
+
+  .kn-item { background: var(--bg1); padding: 20px 20px; text-align: center; position: relative; overflow: hidden; }
+
+  .kn-item::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  }
+
+  .kn-item.kn-start::after  { background: var(--blue); }
+  .kn-item.kn-pct::after    { background: var(--red); }
+  .kn-item.kn-floor::after  { background: var(--amber); }
+  .kn-item.kn-buf::after    { background: var(--green); }
+
+  .kn-label { font-size: 9px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; display: block; }
+  .kn-value { font-family: var(--display); font-size: 36px; letter-spacing: 1px; }
+
+  .kn-start .kn-value  { color: var(--blue); }
+  .kn-pct   .kn-value  { color: var(--red); }
+  .kn-floor .kn-value  { color: var(--amber); }
+  .kn-buf   .kn-value  { color: var(--green); }
+
+  .kn-sub { font-size: 10px; color: var(--muted); margin-top: 6px; letter-spacing: 1px; }
+
+  /* ─── CHART ─── */
+  .chart-wrap {
+    background: var(--bg1); border: 1px solid var(--border);
+    padding: 28px 28px 20px; position: relative;
+    margin-bottom: 8px; animation: fadeUp 0.5s 0.2s ease both; overflow: hidden;
+  }
+
+  .chart-title {
+    font-size: 9px; letter-spacing: 3px; color: var(--muted);
+    text-transform: uppercase; margin-bottom: 18px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .chart-title span { color: var(--blue); }
+
+  svg.main-chart { width: 100%; overflow: visible; }
+
+  .chart-legend {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+  .legend-line { width: 24px; height: 2px; border-radius: 1px; }
+  .legend-dash { width: 24px; height: 0; border-top: 2px dashed; opacity: 0.8; }
+
+  .animated-path {
+    stroke-dasharray: 1200; stroke-dashoffset: 1200;
+    animation: drawLine 2s 0.5s ease forwards;
+  }
+
+  .animated-thresh {
+    stroke-dasharray: 1200; stroke-dashoffset: 1200;
+    animation: drawLine 2s 0.8s ease forwards;
+  }
+
+  /* ─── STEPS ─── */
+  .steps {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1px; background: var(--border); border: 1px solid var(--border);
+    margin-bottom: 28px; animation: fadeUp 0.5s 0.25s ease both;
+  }
+
+  .step { background: var(--bg1); padding: 22px 24px; position: relative; }
+  .step-num { font-family: var(--display); font-size: 64px; line-height: 1; color: var(--border2); position: absolute; top: 12px; right: 18px; letter-spacing: -2px; user-select: none; }
+  .step-tag { font-size: 9px; letter-spacing: 3px; color: var(--blue); text-transform: uppercase; margin-bottom: 8px; }
+  .step-title { font-family: var(--display); font-size: 22px; color: var(--white); letter-spacing: 1px; margin-bottom: 10px; }
+  .step-body { font-family: var(--cond); font-size: 13px; color: var(--text); line-height: 1.6; font-weight: 300; max-width: 340px; }
+  .step-body strong { color: var(--blue); font-weight: 600; }
+  .step-body .g { color: var(--green); font-weight: 600; }
+  .step-body .r { color: var(--red); font-weight: 600; }
+  .step-body .a { color: var(--amber); font-weight: 600; }
+  .step-formula { margin-top: 10px; background: var(--bg2); border: 1px solid var(--border); padding: 8px 12px; font-size: 12px; color: var(--green); display: inline-block; }
+
+  /* ─── SCENARIO TABLE ─── */
+  .scenario {
+    background: var(--bg1); border: 1px solid var(--border);
+    padding: 28px; margin-bottom: 28px; animation: fadeUp 0.5s 0.3s ease both;
+  }
+
+  .scenario-title { font-family: var(--display); font-size: 18px; letter-spacing: 2px; color: var(--white); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .scenario-title .acct { font-size: 11px; letter-spacing: 2px; color: var(--muted); font-family: var(--mono); }
+
+  .scenario-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .scenario-table th { text-align: left; font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; padding: 0 12px 10px 12px; border-bottom: 1px solid var(--border); font-weight: 400; }
+  .scenario-table td { padding: 9px 12px; border-bottom: 1px solid rgba(28,42,58,0.6); font-family: var(--mono); font-size: 12px; }
+  .scenario-table tr:last-child td { border-bottom: none; }
+
+  .td-day    { color: var(--muted); }
+  .td-eod    { color: var(--blue); }
+  .td-high   { color: var(--white); }
+  .td-thresh { color: var(--amber); }
+
+  .tag-up     { color: var(--green); }
+  .tag-same   { color: var(--muted); }
+  .tag-breach { color: var(--red); background: rgba(255,58,92,0.12); border: 1px solid var(--red2); padding: 2px 8px; font-size: 10px; letter-spacing: 1px; }
+  .tag-ok     { color: var(--green); font-size: 10px; letter-spacing: 1px; }
+  .tag-warn   { color: var(--amber); font-size: 10px; letter-spacing: 1px; }
+
+  .breach-row td { background: rgba(255,58,92,0.05); }
+
+  /* ─── RULES GRID ─── */
+  .rules-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 28px; animation: fadeUp 0.5s 0.35s ease both;
+  }
+
+  .rule { background: var(--bg1); border: 1px solid var(--border); padding: 18px 20px; display: flex; gap: 14px; align-items: flex-start; }
+  .rule-icon { font-size: 20px; line-height: 1; flex-shrink: 0; }
+  .rule-title { font-family: var(--cond); font-size: 13px; font-weight: 700; color: var(--white); letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; }
+  .rule-body { font-family: var(--cond); font-size: 12px; color: var(--text); line-height: 1.5; font-weight: 300; }
+  .rule.r-good  { border-left: 3px solid var(--green); }
+  .rule.r-bad   { border-left: 3px solid var(--red); }
+  .rule.r-amber { border-left: 3px solid var(--amber); }
+  .rule.r-blue  { border-left: 3px solid var(--blue); }
+
+  /* ─── POSITION SIZING ─── */
+  .sizing {
+    background: var(--bg1); border: 1px solid var(--border);
+    padding: 28px; margin-bottom: 28px; animation: fadeUp 0.5s 0.38s ease both;
+  }
+
+  .sizing-title { font-family: var(--display); font-size: 18px; letter-spacing: 2px; color: var(--white); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+
+  .sizing-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); }
+
+  .sz-item { background: var(--bg2); padding: 16px 18px; }
+
+  .sz-label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  .sz-val   { font-family: var(--display); font-size: 24px; margin-bottom: 4px; }
+  .sz-sub   { font-family: var(--cond); font-size: 12px; color: var(--muted); font-weight: 300; }
+
+  .sz-item.sz-conservative .sz-val { color: var(--green); }
+  .sz-item.sz-moderate     .sz-val { color: var(--amber); }
+  .sz-item.sz-aggressive   .sz-val { color: var(--red); }
+
+  /* ─── WARNING ─── */
+  .warning {
+    background: var(--red-bg); border: 1px solid var(--red2);
+    border-left: 4px solid var(--red); padding: 16px 22px;
+    display: flex; gap: 14px; align-items: center;
+    animation: fadeUp 0.5s 0.45s ease both;
+  }
+
+  .warning-icon { font-size: 22px; flex-shrink: 0; }
+  .warning-text { font-family: var(--cond); font-size: 13px; color: var(--red); line-height: 1.5; }
+  .warning-text strong { font-weight: 700; letter-spacing: 1px; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeIn  { from { opacity:0 } to { opacity:1 } }
+  @keyframes fadeUp  { from { opacity:0; transform: translateY(16px) } to { opacity:1; transform: none } }
+  @keyframes pulse   { 0%,100% { opacity:1; transform:scale(1) } 50% { opacity:0.4; transform:scale(0.7) } }
+  @keyframes drawLine { from { stroke-dashoffset: 1200 } to { stroke-dashoffset: 0 } }
+</style>
+</head>
+<body>
+
+<!-- ─── HERO ─── -->
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-tag"><span class="dot"></span> FUTURES PROP TRADING — ACCOUNT RULES</div>
+    <h1>EOD <em>Trailing</em><br>Drawdown <span class="pct">3%</span></h1>
+    <div class="hero-sub"><span style="color:var(--amber)">$25,000</span> Account Edition · Mechanics · Numbers · Examples</div>
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <span class="hero-stat-label">Account Size</span>
+        <span class="hero-stat-value amber">$25,000</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-label">Drawdown Limit</span>
+        <span class="hero-stat-value red">3%</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-label">Initial Floor</span>
+        <span class="hero-stat-value blue">$24,250</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-label">Starting Buffer</span>
+        <span class="hero-stat-value green">$750</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-label">Trail Type</span>
+        <span class="hero-stat-value" style="color:var(--white)">EOD ↑ Only</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- ─── DEFINITION ─── -->
+  <div class="sec-head" style="animation-delay:0.1s">
+    <div class="sec-num">01</div>
+    <div class="sec-title">The Rule Explained</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="definition">
+    <p>
+      Your <strong>$25,000 account</strong> is protected by an <strong>EOD Trailing Drawdown of 3%</strong>.
+      This means your <span class="a">loss floor trails upward</span> every time you close a trading day at a
+      new equity high — but <span class="r">never moves down</span>. The floor is always
+      <strong>3% below your highest recorded EOD closing balance</strong>. If your
+      <span class="r">live account balance touches this floor at any moment</span> — intraday or at close —
+      the account is <span class="r">immediately breached</span> and closed.
+    </p>
+  </div>
+
+  <!-- ─── KEY NUMBERS ─── -->
+  <div class="key-numbers">
+    <div class="kn-item kn-start">
+      <span class="kn-label">Starting Balance</span>
+      <div class="kn-value">$25K</div>
+      <div class="kn-sub">$25,000.00</div>
+    </div>
+    <div class="kn-item kn-pct">
+      <span class="kn-label">Trail Distance</span>
+      <div class="kn-value">3%</div>
+      <div class="kn-sub">of EOD High Watermark</div>
+    </div>
+    <div class="kn-item kn-floor">
+      <span class="kn-label">Initial Floor</span>
+      <div class="kn-value">$24,250</div>
+      <div class="kn-sub">$25,000 × 0.97</div>
+    </div>
+    <div class="kn-item kn-buf">
+      <span class="kn-label">Starting Buffer</span>
+      <div class="kn-value">$750</div>
+      <div class="kn-sub">$25,000 × 0.03</div>
+    </div>
+  </div>
+
+  <!-- ─── CHART ─── -->
+  <div class="sec-head" style="animation-delay:0.2s">
+    <div class="sec-num">02</div>
+    <div class="sec-title">Visual — How the Trail Moves</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">
+      <span>$25,000 ACCOUNT — EOD EQUITY vs TRAILING THRESHOLD</span>
+      <span>D1 CANDLES · EOD SNAPSHOTS</span>
+    </div>
+
+    <!--
+      Scale: y=330 = $23,500 | y=30 = $26,500
+      Range: $3,000 over 300px → 0.1px/$
+      y(val) = 330 - (val - 23500) * 0.1
+
+      Key values:
+        $23,500 → 330     $24,000 → 280     $24,250 → 255
+        $24,638 → 216     $24,929 → 187     $25,000 → 180
+        $25,317 → 148     $25,400 → 140     $25,550 → 125
+        $25,700 → 110     $25,800 → 100     $26,100 → 70
+
+      Equity (EOD closes):
+        START  x=60  : $25,000 → y=180
+        Day1   x=180 : $25,400 → y=140  (new high)
+        Day2   x=300 : $25,700 → y=110  (new high)
+        Day3   x=420 : $25,550 → y=125  (lower)
+        Day4   x=540 : $26,100 → y=70   (new high)
+        Day5   x=660 : $25,800 → y=100  (lower)
+        Day6   x=720 : BREACH $25,290 → y=151 (touches threshold $25,317)
+
+      Threshold (step):
+        x=60→180  : $24,250 → y=255
+        step @180 : $24,638 → y=216.2≈216
+        x=180→300 : y=216
+        step @300 : $24,929 → y=187.1≈187
+        x=300→540 : y=187
+        step @540 : $25,317 → y=148.3≈148
+        x=540→720 : y=148
+    -->
+
+    <svg class="main-chart" viewBox="0 0 960 380" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="equityGrad25" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4db8ff" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#4db8ff" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="dangerGrad25" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff3a5c" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#ff3a5c" stop-opacity="0.22"/>
+        </linearGradient>
+        <clipPath id="chartClip25">
+          <rect x="60" y="10" width="880" height="340"/>
+        </clipPath>
+      </defs>
+
+      <!-- Grid -->
+      <g stroke="#1c2a3a" stroke-width="1">
+        <line x1="60" y1="30"  x2="940" y2="30"/>
+        <line x1="60" y1="80"  x2="940" y2="80"/>
+        <line x1="60" y1="130" x2="940" y2="130"/>
+        <line x1="60" y1="180" x2="940" y2="180"/>
+        <line x1="60" y1="230" x2="940" y2="230"/>
+        <line x1="60" y1="280" x2="940" y2="280"/>
+        <line x1="60" y1="330" x2="940" y2="330"/>
+        <!-- Vertical day dividers -->
+        <line x1="60"  y1="20" x2="60"  y2="340" stroke="#243040"/>
+        <line x1="180" y1="20" x2="180" y2="340"/>
+        <line x1="300" y1="20" x2="300" y2="340"/>
+        <line x1="420" y1="20" x2="420" y2="340"/>
+        <line x1="540" y1="20" x2="540" y2="340"/>
+        <line x1="660" y1="20" x2="660" y2="340"/>
+        <line x1="780" y1="20" x2="780" y2="340"/>
+        <line x1="940" y1="20" x2="940" y2="340" stroke="#243040"/>
+      </g>
+
+      <!-- Y Axis labels -->
+      <g font-family="IBM Plex Mono" font-size="9" fill="#3d5570" text-anchor="end">
+        <text x="54" y="34">$26,500</text>
+        <text x="54" y="84">$26,000</text>
+        <text x="54" y="134">$25,500</text>
+        <text x="54" y="184">$25,000</text>
+        <text x="54" y="234">$24,500</text>
+        <text x="54" y="284">$24,000</text>
+        <text x="54" y="334">$23,500</text>
+      </g>
+
+      <!-- X Axis labels -->
+      <g font-family="IBM Plex Mono" font-size="9" fill="#3d5570" text-anchor="middle">
+        <text x="120" y="358">DAY 1</text>
+        <text x="240" y="358">DAY 2</text>
+        <text x="360" y="358">DAY 3</text>
+        <text x="480" y="358">DAY 4</text>
+        <text x="600" y="358">DAY 5</text>
+        <text x="720" y="358">DAY 6</text>
+      </g>
+
+      <!-- Danger zone under threshold -->
+      <polygon
+        points="60,255 180,255 180,216 300,216 300,187 540,187 540,148 720,148 720,340 60,340"
+        fill="rgba(245,166,35,0.05)"
+        clip-path="url(#chartClip25)"
+      />
+
+      <!-- Hard danger zone (below initial floor) -->
+      <rect x="60" y="280" width="880" height="52" fill="url(#dangerGrad25)" clip-path="url(#chartClip25)"/>
+
+      <!-- Equity area fill -->
+      <polygon
+        points="60,180 180,140 300,110 420,125 540,70 660,100 720,151 720,340 60,340"
+        fill="url(#equityGrad25)"
+        clip-path="url(#chartClip25)"
+      />
+
+      <!-- ─── THRESHOLD (amber dashed step) ─── -->
+      <polyline class="animated-thresh"
+        points="60,255 180,255 180,216 300,216 300,187 540,187 540,148 720,148"
+        fill="none"
+        stroke="#f5a623"
+        stroke-width="2"
+        stroke-dasharray="6,4"
+      />
+
+      <!-- ─── EQUITY LINE ─── -->
+      <polyline class="animated-path"
+        points="60,180 180,140 300,110 420,125 540,70 660,100 720,151"
+        fill="none"
+        stroke="#4db8ff"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+
+      <!-- EOD dots -->
+      <g fill="#4db8ff" stroke="#07090c" stroke-width="2">
+        <circle cx="60"  cy="180" r="5"/>
+        <circle cx="180" cy="140" r="5"/>
+        <circle cx="300" cy="110" r="5"/>
+        <circle cx="420" cy="125" r="5"/>
+        <circle cx="540" cy="70"  r="5"/>
+        <circle cx="660" cy="100" r="5"/>
+      </g>
+
+      <!-- Breach point -->
+      <circle cx="720" cy="148" r="7" fill="#ff3a5c" stroke="#ff3a5c" stroke-width="2" opacity="0.4">
+        <animate attributeName="r" values="7;14;7" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.4;0;0.4" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="720" cy="148" r="6" fill="#ff3a5c" stroke="#07090c" stroke-width="2"/>
+
+      <!-- Threshold updated dots -->
+      <g fill="#f5a623" stroke="#07090c" stroke-width="1.5">
+        <circle cx="180" cy="216" r="4"/>
+        <circle cx="300" cy="187" r="4"/>
+        <circle cx="540" cy="148" r="4"/>
+      </g>
+
+      <!-- START annotation -->
+      <g font-family="IBM Plex Mono" font-size="9">
+        <text x="65" y="176" fill="#4db8ff">$25,000</text>
+        <text x="65" y="188" fill="#3d5570">START</text>
+        <text x="65" y="251" fill="#f5a623">FLOOR $24,250</text>
+      </g>
+
+      <!-- D1 annotation -->
+      <g>
+        <line x1="180" y1="140" x2="180" y2="86" stroke="#4db8ff" stroke-width="1" stroke-dasharray="2,2" opacity="0.5"/>
+        <text x="186" y="84" font-family="IBM Plex Mono" font-size="9" fill="#4db8ff">$25,400 ↑ NEW HIGH</text>
+        <text x="186" y="96" font-family="IBM Plex Mono" font-size="8" fill="#f5a623">FLOOR → $24,638</text>
+      </g>
+
+      <!-- D4 peak annotation -->
+      <g>
+        <line x1="540" y1="70" x2="540" y2="30" stroke="#4db8ff" stroke-width="1" stroke-dasharray="2,2" opacity="0.5"/>
+        <text x="546" y="28" font-family="IBM Plex Mono" font-size="9" fill="#4db8ff">$26,100 ↑ PEAK</text>
+        <text x="546" y="40" font-family="IBM Plex Mono" font-size="8" fill="#f5a623">FLOOR → $25,317</text>
+      </g>
+
+      <!-- Breach annotation -->
+      <g>
+        <line x1="720" y1="148" x2="800" y2="110" stroke="#ff3a5c" stroke-width="1" stroke-dasharray="2,2" opacity="0.7"/>
+        <rect x="804" y="92" width="132" height="38" fill="rgba(255,58,92,0.1)" stroke="#c02040" stroke-width="1"/>
+        <text x="812" y="107" font-family="IBM Plex Mono" font-size="9" fill="#ff3a5c">⚠ BREACH</text>
+        <text x="812" y="121" font-family="IBM Plex Mono" font-size="8" fill="#ff3a5c">$25,290 &lt; $25,317</text>
+      </g>
+
+      <!-- Axes -->
+      <line x1="60" y1="20" x2="60" y2="340" stroke="#243040" stroke-width="1"/>
+      <line x1="60" y1="340" x2="940" y2="340" stroke="#243040" stroke-width="1"/>
+    </svg>
+
+    <div class="chart-legend">
+      <div class="legend-item">
+        <div class="legend-line" style="background:#4db8ff"></div>
+        Account Equity
+      </div>
+      <div class="legend-item">
+        <div class="legend-dash" style="border-color:#f5a623"></div>
+        Trailing Floor (3% below EOD High)
+      </div>
+      <div class="legend-item">
+        <svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="#4db8ff"/></svg>
+        EOD Snapshot
+      </div>
+      <div class="legend-item">
+        <svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="#f5a623"/></svg>
+        Floor Updated
+      </div>
+      <div class="legend-item">
+        <svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="#ff3a5c"/></svg>
+        Breach Point
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── HOW IT WORKS ─── -->
+  <div class="sec-head" style="animation-delay:0.25s;margin-top:40px">
+    <div class="sec-num">03</div>
+    <div class="sec-title">Step-by-Step Mechanics</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-tag">Day 0 — Account Opened</div>
+      <div class="step-title">Floor Is Set</div>
+      <div class="step-body">
+        Your initial loss floor is placed <strong>3% below $25,000</strong>. That gives you exactly <span class="a">$750 of breathing room</span> from the very first trade.
+      </div>
+      <div class="step-formula">$25,000 × 0.97 = $24,250 floor</div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-tag">During the Session</div>
+      <div class="step-title">Live P&L Watched</div>
+      <div class="step-body">
+        Your <span class="r">live balance is monitored every tick</span>. The floor does not move intraday, but a breach can happen at any moment. If balance hits $24,250 (or current floor), it's over immediately.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-tag">Market Close (EOD)</div>
+      <div class="step-title">Watermark Compared</div>
+      <div class="step-body">
+        At close, your EOD balance is compared to the <strong>previous EOD high watermark</strong>. Only a <span class="g">new EOD high</span> causes the floor to trail upward.
+      </div>
+      <div class="step-formula">New EOD High × 0.97 = New Floor</div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-tag">No New High</div>
+      <div class="step-title">Floor Stays Fixed</div>
+      <div class="step-body">
+        A down day compresses your buffer but <span class="r">cannot lower the floor</span>. The trail is strictly one-directional. Once locked in, a level is permanent until a new high is made.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-tag">Profit Lock-In</div>
+      <div class="step-title">Floor Reaches $25K</div>
+      <div class="step-body">
+        Once your <span class="g">EOD high exceeds ~$25,773</span>, the trailing floor crosses your starting balance. On most platforms it then <span class="g">locks permanently at $25,000</span> — your funded capital is fully protected.
+      </div>
+      <div class="step-formula">EOD High ≥ $25,773 → Floor = $25,000</div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-tag">Breach Event</div>
+      <div class="step-title">Account Closed</div>
+      <div class="step-body">
+        Live balance drops to or below current floor → <span class="r">immediate liquidation of all positions</span>. Account is closed. You must re-purchase an evaluation or restart the qualification process.
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── DAY-BY-DAY TABLE ─── -->
+  <div class="sec-head" style="animation-delay:0.3s">
+    <div class="sec-num">04</div>
+    <div class="sec-title">Day-by-Day Example — $25,000 Account</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title">
+      $25,000 Futures — 3% EOD Trailing Drawdown Walkthrough
+      <span class="acct">FLOOR = EOD_HIGH × 0.97</span>
+    </div>
+    <table class="scenario-table">
+      <thead>
+        <tr>
+          <th>DAY</th>
+          <th>EOD BALANCE</th>
+          <th>EOD HIGH WATERMARK</th>
+          <th>TRAIL UPDATED?</th>
+          <th>FLOOR (THRESHOLD)</th>
+          <th>BUFFER REMAINING</th>
+          <th>STATUS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-day">START</td>
+          <td class="td-eod">$25,000.00</td>
+          <td class="td-high">$25,000.00</td>
+          <td><span class="tag-same">—</span></td>
+          <td class="td-thresh">$24,250.00</td>
+          <td>$750.00</td>
+          <td><span class="tag-ok">✓ OPEN</span></td>
+        </tr>
+        <tr>
+          <td class="td-day">Day 1</td>
+          <td class="td-eod">$25,400.00</td>
+          <td class="td-high">$25,400.00</td>
+          <td><span class="tag-up">↑ YES</span></td>
+          <td class="td-thresh">$24,638.00</td>
+          <td>$762.00</td>
+          <td><span class="tag-ok">✓ OPEN</span></td>
+        </tr>
+        <tr>
+          <td class="td-day">Day 2</td>
+          <td class="td-eod">$25,700.00</td>
+          <td class="td-high">$25,700.00</td>
+          <td><span class="tag-up">↑ YES</span></td>
+          <td class="td-thresh">$24,929.00</td>
+          <td>$771.00</td>
+          <td><span class="tag-ok">✓ OPEN</span></td>
+        </tr>
+        <tr>
+          <td class="td-day">Day 3</td>
+          <td class="td-eod">$25,550.00</td>
+          <td class="td-high">$25,700.00</td>
+          <td><span class="tag-same">— NO</span></td>
+          <td class="td-thresh">$24,929.00</td>
+          <td>$621.00</td>
+          <td><span class="tag-warn">⚡ LOWER EOD</span></td>
+        </tr>
+        <tr>
+          <td class="td-day">Day 4</td>
+          <td class="td-eod">$26,100.00</td>
+          <td class="td-high">$26,100.00</td>
+          <td><span class="tag-up">↑ YES</span></td>
+          <td class="td-thresh">$25,317.00</td>
+          <td>$783.00</td>
+          <td><span class="tag-ok">✓ OPEN</span></td>
+        </tr>
+        <tr>
+          <td class="td-day">Day 5</td>
+          <td class="td-eod">$25,800.00</td>
+          <td class="td-high">$26,100.00</td>
+          <td><span class="tag-same">— NO</span></td>
+          <td class="td-thresh">$25,317.00</td>
+          <td>$483.00</td>
+          <td><span class="tag-warn">⚡ LOWER EOD</span></td>
+        </tr>
+        <tr class="breach-row">
+          <td class="td-day">Day 6</td>
+          <td class="td-eod" style="color:var(--red)">$25,290.00</td>
+          <td class="td-high">$26,100.00</td>
+          <td><span class="tag-same">— NO</span></td>
+          <td class="td-thresh">$25,317.00</td>
+          <td style="color:var(--red)">−$27.00</td>
+          <td><span class="tag-breach">✖ BREACHED</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── POSITION SIZING GUIDE ─── -->
+  <div class="sec-head" style="animation-delay:0.35s">
+    <div class="sec-num">05</div>
+    <div class="sec-title">Position Sizing Guide — $750 Buffer</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="sizing">
+    <div class="sizing-title">HOW MUCH TO RISK PER TRADE ON A $25,000 ACCOUNT</div>
+    <div class="sizing-grid">
+      <div class="sz-item sz-conservative">
+        <div class="sz-label">Conservative (10% of buffer)</div>
+        <div class="sz-val">$75 / trade</div>
+        <div class="sz-sub">≈ 3 ticks MES · or 0.75 ticks MNQ<br>Survives 10 max-loss trades before breach</div>
+      </div>
+      <div class="sz-item sz-moderate">
+        <div class="sz-label">Moderate (20–25% of buffer)</div>
+        <div class="sz-val">$150–$190</div>
+        <div class="sz-sub">≈ 1 ES contract risk · or 1–2 NQ ticks<br>Survives 4–5 max-loss trades before breach</div>
+      </div>
+      <div class="sz-item sz-aggressive">
+        <div class="sz-label">Risky (50%+ of buffer)</div>
+        <div class="sz-val">$375+</div>
+        <div class="sz-sub">Two bad trades = breach territory<br>Not recommended for EOD trail accounts</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── RULES ─── -->
+  <div class="sec-head" style="animation-delay:0.38s">
+    <div class="sec-num">06</div>
+    <div class="sec-title">Critical Rules to Know</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="rules-grid">
+    <div class="rule r-blue">
+      <div class="rule-icon">📅</div>
+      <div>
+        <div class="rule-title">EOD Only — Intraday Highs Don't Trail</div>
+        <div class="rule-body">An intraday spike to $27,000 that closes at $25,600 only updates the floor from $25,600 × 0.97 — not $27,000. Intraday peaks are irrelevant to the trail calculation.</div>
+      </div>
+    </div>
+    <div class="rule r-bad">
+      <div class="rule-icon">⚡</div>
+      <div>
+        <div class="rule-title">Intraday Breach Is Instant — No Grace Period</div>
+        <div class="rule-body">Even with a $750 buffer, a single bad trade can trigger a breach. If live P&L drops to the current floor during any trading session, the account is closed immediately with no recovery window.</div>
+      </div>
+    </div>
+    <div class="rule r-good">
+      <div class="rule-icon">↑</div>
+      <div>
+        <div class="rule-title">Floor Never Goes Down — Locks In Gains</div>
+        <div class="rule-body">Once you've pushed the floor up through consistent EOD highs, that protection is permanent. A losing day only reduces your buffer — it cannot lower an already-established floor.</div>
+      </div>
+    </div>
+    <div class="rule r-amber">
+      <div class="rule-icon">🔒</div>
+      <div>
+        <div class="rule-title">Lock-In Threshold — ~$25,773 EOD High</div>
+        <div class="rule-body">On a $25,000 account, once your EOD high watermark reaches approximately $25,773, the trailing floor crosses your starting balance. Most firms then lock the floor at $25,000 permanently — your funded capital is safe forever.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── WARNING ─── -->
+  <div class="warning">
+    <div class="warning-icon">⚠️</div>
+    <div class="warning-text">
+      <strong>CRITICAL — $750 IS THIN:</strong> On a $25,000 account, your entire buffer is just $750. One ES contract can move $50/tick — a 15-tick adverse move wipes the buffer. Always ensure your worst-case per-trade risk is less than 25% of the current buffer ($187.50 or less). Never add to losing positions.
+    </div>
+  </div>
+
+</main>
+</body>
+</html>
