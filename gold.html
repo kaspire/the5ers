@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold Session Reversal System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #12151c;
+    --surface-2: #1a1e28;
+    --surface-3: #222633;
+    --border: #252a36;
+    --text: #e2e4e9;
+    --text-dim: #7a8194;
+    --gold: #f0b90b;
+    --gold-dim: rgba(240, 185, 11, 0.10);
+    --gold-glow: rgba(240, 185, 11, 0.25);
+    --green: #2dd4a0;
+    --green-dim: rgba(45, 212, 160, 0.08);
+    --red: #ff3b5c;
+    --red-dim: rgba(255, 59, 92, 0.10);
+    --blue: #5b8af5;
+    --blue-dim: rgba(91, 138, 245, 0.10);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167, 139, 250, 0.10);
+    --cyan: #22d3ee;
+    --cyan-dim: rgba(34, 211, 238, 0.10);
+    --session-green: #2a9d5c;
+    --session-green-dim: rgba(42, 157, 92, 0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .grain {
+    position: fixed; inset: 0; z-index: 100; pointer-events: none; opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+    position: relative;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    margin-bottom: 52px;
+    animation: fadeUp 0.7s ease both;
+  }
+  .header .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border: 1px solid rgba(240,185,11,0.18);
+    padding: 7px 18px;
+    border-radius: 100px;
+    margin-bottom: 22px;
+  }
+  .header h1 {
+    font-size: clamp(28px, 5vw, 46px);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.5px;
+    margin-bottom: 14px;
+  }
+  .header h1 .gold { color: var(--gold); }
+  .header h1 .dim { color: var(--text-dim); font-weight: 400; }
+  .header p {
+    color: var(--text-dim);
+    font-size: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+  .header p strong { color: var(--text); font-weight: 600; }
+
+  /* ── SESSION OVERVIEW BAR ── */
+  .session-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 48px;
+    animation: fadeUp 0.7s ease both;
+    animation-delay: 0.08s;
+  }
+  .session-bar .seg {
+    padding: 20px 24px;
+    background: var(--surface);
+    text-align: center;
+  }
+  .seg .seg-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .seg .seg-value {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .seg .seg-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .seg:nth-child(1) .seg-value { color: var(--session-green); }
+  .seg:nth-child(2) .seg-value { color: var(--cyan); }
+  .seg:nth-child(3) .seg-value { color: var(--gold); }
+
+  /* ── CHART ILLUSTRATION ── */
+  .chart-section {
+    margin-bottom: 52px;
+    animation: fadeUp 0.7s ease both;
+    animation-delay: 0.14s;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 32px 28px 24px;
+    overflow: hidden;
+  }
+  .chart-card .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .chart-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .chart-card .pair-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--gold);
+    background: var(--gold-dim);
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+  .chart-card .chart-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+
+  .chart-canvas {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    overflow: visible;
+  }
+  .chart-canvas svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* ── STEPS GRID ── */
+  .steps-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    animation: fadeUp 0.7s ease both;
+    animation-delay: 0.2s;
+  }
+
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    animation: fadeUp 0.7s ease both;
+    transition: border-color 0.2s;
+  }
+  .step:hover { border-color: rgba(240,185,11,0.25); }
+
+  .step:nth-child(1) { animation-delay: 0.22s; }
+  .step:nth-child(2) { animation-delay: 0.26s; }
+  .step:nth-child(3) { animation-delay: 0.30s; }
+  .step:nth-child(4) { animation-delay: 0.34s; }
+  .step:nth-child(5) { animation-delay: 0.38s; }
+  .step:nth-child(6) { animation-delay: 0.42s; }
+  .step:nth-child(7) { animation-delay: 0.46s; }
+
+  .step .step-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    border-right: 1px solid var(--border);
+  }
+  .step:nth-child(1) .step-num { color: var(--session-green); background: var(--session-green-dim); }
+  .step:nth-child(2) .step-num { color: var(--gold); background: var(--gold-dim); }
+  .step:nth-child(3) .step-num { color: var(--red); background: var(--red-dim); }
+  .step:nth-child(4) .step-num { color: var(--purple); background: var(--purple-dim); }
+  .step:nth-child(5) .step-num { color: var(--cyan); background: var(--cyan-dim); }
+  .step:nth-child(6) .step-num { color: var(--blue); background: var(--blue-dim); }
+  .step:nth-child(7) .step-num { color: var(--gold); background: var(--gold-dim); }
+
+  .step .step-body {
+    padding: 18px 22px;
+  }
+  .step .step-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .step .step-title .time-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .step .step-desc {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .step .step-desc strong { color: var(--text); font-weight: 600; }
+
+  /* ── BOTTOM RULES STRIP ── */
+  .rules-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.7s ease both;
+    animation-delay: 0.5s;
+  }
+  .mini-rule {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .mini-rule .mr-icon {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .mini-rule .mr-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .mini-rule .mr-desc {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .footer-note {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    opacity: 0.45;
+    animation: fadeUp 0.7s ease both;
+    animation-delay: 0.55s;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 700px) {
+    .page { padding: 36px 16px 60px; }
+    .session-bar { grid-template-columns: 1fr; }
+    .rules-strip { grid-template-columns: 1fr; }
+    .chart-canvas { height: 320px; }
+    .step { grid-template-columns: 44px 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="badge">🥇 XAUUSD · 15M</div>
+    <h1><span class="gold">Gold</span> Session Reversal <span class="dim">System</span></h1>
+    <p>A 7-step intraday system built around the <strong>4–11 AM GMT+1</strong> session range. Wait for a liquidity sweep, identify the order block reversal during the <strong>13–16 PM</strong> kill zone, and target the opposite end of the range.</p>
+  </div>
+
+  <!-- SESSION OVERVIEW -->
+  <div class="session-bar">
+    <div class="seg">
+      <div class="seg-label">Markup Session</div>
+      <div class="seg-value">04:00 – 11:00</div>
+      <div class="seg-sub">GMT+1 · Define Range</div>
+    </div>
+    <div class="seg">
+      <div class="seg-label">Kill Zone</div>
+      <div class="seg-value">13:00 – 16:00</div>
+      <div class="seg-sub">GMT+1 · Reversal Window</div>
+    </div>
+    <div class="seg">
+      <div class="seg-label">Target</div>
+      <div class="seg-value">Range H / L</div>
+      <div class="seg-sub">Opposite side of sweep</div>
+    </div>
+  </div>
+
+  <!-- CHART ILLUSTRATION -->
+  <div class="chart-section">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>System Blueprint — Bearish Sweep → Long</h3>
+        <span class="pair-tag">XAUUSD · 15M</span>
+      </div>
+      <div class="chart-sub">Example: Wick takes low, reversal at order block, entry inside imbalance, target high</div>
+
+      <div class="chart-canvas">
+        <svg viewBox="0 0 920 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+          <!-- SESSION ZONE 04:00-11:00 -->
+          <rect x="60" y="20" width="300" height="380" rx="6" fill="rgba(42,157,92,0.06)" stroke="rgba(42,157,92,0.15)" stroke-width="1" stroke-dasharray="5,4"/>
+          <text x="210" y="14" fill="#2a9d5c" font-family="DM Mono, monospace" font-size="10" text-anchor="middle" letter-spacing="1.5" opacity="0.7">04:00 — 11:00 GMT+1</text>
+
+          <!-- KILL ZONE 13:00-16:00 -->
+          <rect x="420" y="20" width="240" height="380" rx="6" fill="rgba(34,211,238,0.04)" stroke="rgba(34,211,238,0.12)" stroke-width="1" stroke-dasharray="5,4"/>
+          <text x="540" y="14" fill="#22d3ee" font-family="DM Mono, monospace" font-size="10" text-anchor="middle" letter-spacing="1.5" opacity="0.7">13:00 — 16:00 GMT+1</text>
+
+          <!-- RANGE HIGH dashed line -->
+          <line x1="60" y1="68" x2="870" y2="68" stroke="#f0b90b" stroke-width="1" stroke-dasharray="6,5" opacity="0.4"/>
+          <rect x="10" y="59" width="46" height="18" rx="4" fill="rgba(240,185,11,0.12)"/>
+          <text x="33" y="72" fill="#f0b90b" font-family="DM Mono, monospace" font-size="9.5" text-anchor="middle">HIGH</text>
+
+          <!-- RANGE LOW dashed line -->
+          <line x1="60" y1="340" x2="870" y2="340" stroke="#f0b90b" stroke-width="1" stroke-dasharray="6,5" opacity="0.4"/>
+          <rect x="12" y="331" width="42" height="18" rx="4" fill="rgba(240,185,11,0.12)"/>
+          <text x="33" y="344" fill="#f0b90b" font-family="DM Mono, monospace" font-size="9.5" text-anchor="middle">LOW</text>
+
+          <!-- ── SESSION CANDLES (simplified) ── -->
+          <!-- Candle bodies going up and down in session range -->
+          <!-- Bull candle -->
+          <line x1="100" y1="250" x2="100" y2="290" stroke="#7a8194" stroke-width="1"/>
+          <rect x="95" y="258" width="10" height="22" rx="1" fill="#2dd4a0" opacity="0.7"/>
+          <!-- Bear candle -->
+          <line x1="130" y1="200" x2="130" y2="270" stroke="#7a8194" stroke-width="1"/>
+          <rect x="125" y="210" width="10" height="40" rx="1" fill="#ff3b5c" opacity="0.7"/>
+          <!-- Bull candle -->
+          <line x1="160" y1="180" x2="160" y2="240" stroke="#7a8194" stroke-width="1"/>
+          <rect x="155" y="190" width="10" height="35" rx="1" fill="#2dd4a0" opacity="0.7"/>
+          <!-- Big bull to high -->
+          <line x1="190" y1="105" x2="190" y2="200" stroke="#7a8194" stroke-width="1"/>
+          <rect x="185" y="110" width="10" height="70" rx="1" fill="#2dd4a0" opacity="0.7"/>
+          <!-- Wick to Range High - STEP 2 marker -->
+          <line x1="220" y1="68" x2="220" y2="160" stroke="#7a8194" stroke-width="1"/>
+          <rect x="215" y="100" width="10" height="50" rx="1" fill="#ff3b5c" opacity="0.7"/>
+
+          <!-- ② label -->
+          <circle cx="220" cy="55" r="12" fill="rgba(240,185,11,0.15)" stroke="#f0b90b" stroke-width="1"/>
+          <text x="220" y="59" fill="#f0b90b" font-family="DM Mono, monospace" font-size="11" text-anchor="middle" font-weight="500">2</text>
+
+          <!-- Session continues down -->
+          <line x1="250" y1="120" x2="250" y2="195" stroke="#7a8194" stroke-width="1"/>
+          <rect x="245" y="130" width="10" height="50" rx="1" fill="#ff3b5c" opacity="0.7"/>
+          <line x1="280" y1="160" x2="280" y2="230" stroke="#7a8194" stroke-width="1"/>
+          <rect x="275" y="175" width="10" height="40" rx="1" fill="#2dd4a0" opacity="0.7"/>
+          <line x1="310" y1="180" x2="310" y2="240" stroke="#7a8194" stroke-width="1"/>
+          <rect x="305" y="190" width="10" height="35" rx="1" fill="#ff3b5c" opacity="0.7"/>
+          <line x1="340" y1="195" x2="340" y2="250" stroke="#7a8194" stroke-width="1"/>
+          <rect x="335" y="200" width="10" height="35" rx="1" fill="#2dd4a0" opacity="0.7"/>
+
+          <!-- ① label at Low zone start -->
+          <circle cx="100" cy="304" r="12" fill="rgba(42,157,92,0.15)" stroke="#2a9d5c" stroke-width="1"/>
+          <text x="100" y="308" fill="#2a9d5c" font-family="DM Mono, monospace" font-size="11" text-anchor="middle" font-weight="500">1</text>
+
+          <!-- TRANSITION CANDLES between zones -->
+          <line x1="375" y1="200" x2="375" y2="260" stroke="#7a8194" stroke-width="1"/>
+          <rect x="370" y="210" width="10" height="35" rx="1" fill="#ff3b5c" opacity="0.7"/>
+          <line x1="400" y1="230" x2="400" y2="290" stroke="#7a8194" stroke-width="1"/>
+          <rect x="395" y="240" width="10" height="35" rx="1" fill="#ff3b5c" opacity="0.7"/>
+
+          <!-- ── ORDER BLOCK (bearish candle that gets reversed) ── -->
+          <rect x="420" y="272" width="60" height="44" rx="4" fill="rgba(255,59,92,0.08)" stroke="rgba(255,59,92,0.25)" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="450" y="290" fill="#ff3b5c" font-family="DM Mono, monospace" font-size="8.5" text-anchor="middle" letter-spacing="1" opacity="0.8">ORDER</text>
+          <text x="450" y="303" fill="#ff3b5c" font-family="DM Mono, monospace" font-size="8.5" text-anchor="middle" letter-spacing="1" opacity="0.8">BLOCK</text>
+
+          <!-- Bear candle (the OB) -->
+          <line x1="435" y1="270" x2="435" y2="330" stroke="#7a8194" stroke-width="1"/>
+          <rect x="430" y="278" width="10" height="40" rx="1" fill="#ff3b5c" opacity="0.8"/>
+
+          <!-- Sweep candle - wicks below Low, then reverses -->
+          <line x1="465" y1="260" x2="465" y2="370" stroke="#7a8194" stroke-width="1"/>
+          <rect x="460" y="270" width="10" height="50" rx="1" fill="#2dd4a0" opacity="0.9"/>
+
+          <!-- ④ Imbalance / FVG zone -->
+          <rect x="485" y="238" width="80" height="32" rx="4" fill="rgba(167,139,250,0.08)" stroke="rgba(167,139,250,0.25)" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="525" y="259" fill="#a78bfa" font-family="DM Mono, monospace" font-size="8.5" text-anchor="middle" letter-spacing="1" opacity="0.8">IMBALANCE / FVG</text>
+
+          <!-- ③ label -->
+          <circle cx="465" cy="382" r="12" fill="rgba(255,59,92,0.15)" stroke="#ff3b5c" stroke-width="1"/>
+          <text x="465" y="386" fill="#ff3b5c" font-family="DM Mono, monospace" font-size="11" text-anchor="middle" font-weight="500">3</text>
+
+          <!-- ④ label -->
+          <circle cx="525" cy="225" r="12" fill="rgba(167,139,250,0.15)" stroke="#a78bfa" stroke-width="1"/>
+          <text x="525" y="229" fill="#a78bfa" font-family="DM Mono, monospace" font-size="11" text-anchor="middle" font-weight="500">4</text>
+
+          <!-- Bull continuation candles in kill zone -->
+          <line x1="500" y1="220" x2="500" y2="285" stroke="#7a8194" stroke-width="1"/>
+          <rect x="495" y="230" width="10" height="40" rx="1" fill="#2dd4a0" opacity="0.8"/>
+
+          <line x1="530" y1="195" x2="530" y2="260" stroke="#7a8194" stroke-width="1"/>
+          <rect x="525" y="205" width="10" height="38" rx="1" fill="#2dd4a0" opacity="0.8"/>
+
+          <!-- Small pullback into FVG — entry area -->
+          <line x1="560" y1="215" x2="560" y2="265" stroke="#7a8194" stroke-width="1"/>
+          <rect x="555" y="225" width="10" height="30" rx="1" fill="#ff3b5c" opacity="0.6"/>
+
+          <!-- ⑥ ENTRY ARROW inside imbalance -->
+          <line x1="575" y1="248" x2="595" y2="248" stroke="#5b8af5" stroke-width="2" marker-end="url(#arrowBlue)"/>
+          <defs>
+            <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L8,3 L0,6" fill="#5b8af5"/>
+            </marker>
+            <marker id="arrowGold" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L8,3 L0,6" fill="#f0b90b"/>
+            </marker>
+          </defs>
+
+          <!-- ⑥ label -->
+          <circle cx="600" cy="248" r="12" fill="rgba(91,138,245,0.15)" stroke="#5b8af5" stroke-width="1"/>
+          <text x="600" y="252" fill="#5b8af5" font-family="DM Mono, monospace" font-size="11" text-anchor="middle" font-weight="500">6</text>
+
+          <!-- ⑤ label at reversal -->
+          <circle cx="465" cy="255" r="12" fill="rgba(34,211,238,0.15)" stroke="#22d3ee" stroke-width="1"/>
+          <text x="465" y="259" fill="#22d3ee" font-family="DM Mono, monospace" font-size="11" text-anchor="middle" font-weight="500">5</text>
+
+          <!-- Continuation to target -->
+          <line x1="620" y1="200" x2="620" y2="258" stroke="#7a8194" stroke-width="1"/>
+          <rect x="615" y="208" width="10" height="38" rx="1" fill="#2dd4a0" opacity="0.7"/>
+          <line x1="650" y1="175" x2="650" y2="230" stroke="#7a8194" stroke-width="1"/>
+          <rect x="645" y="182" width="10" height="35" rx="1" fill="#2dd4a0" opacity="0.7"/>
+          <line x1="680" y1="155" x2="680" y2="210" stroke="#7a8194" stroke-width="1"/>
+          <rect x="675" y="160" width="10" height="30" rx="1" fill="#ff3b5c" opacity="0.6"/>
+          <line x1="710" y1="130" x2="710" y2="190" stroke="#7a8194" stroke-width="1"/>
+          <rect x="705" y="135" width="10" height="40" rx="1" fill="#2dd4a0" opacity="0.7"/>
+          <line x1="740" y1="100" x2="740" y2="165" stroke="#7a8194" stroke-width="1"/>
+          <rect x="735" y="108" width="10" height="42" rx="1" fill="#2dd4a0" opacity="0.8"/>
+
+          <!-- Bull candle hits the target HIGH -->
+          <line x1="770" y1="60" x2="770" y2="130" stroke="#7a8194" stroke-width="1"/>
+          <rect x="765" y="68" width="10" height="48" rx="1" fill="#2dd4a0" opacity="0.9"/>
+
+          <!-- ⑦ TARGET label -->
+          <circle cx="770" cy="48" r="12" fill="rgba(240,185,11,0.18)" stroke="#f0b90b" stroke-width="1.5"/>
+          <text x="770" y="52" fill="#f0b90b" font-family="DM Mono, monospace" font-size="11" text-anchor="middle" font-weight="500">7</text>
+
+          <!-- Target profit arrow -->
+          <path d="M 610,248 Q 690,100 760,68" stroke="#f0b90b" stroke-width="1.5" stroke-dasharray="6,4" fill="none" opacity="0.4"/>
+          <rect x="790" y="55" width="64" height="22" rx="5" fill="rgba(240,185,11,0.12)" stroke="rgba(240,185,11,0.3)" stroke-width="0.8"/>
+          <text x="822" y="70" fill="#f0b90b" font-family="DM Mono, monospace" font-size="10" text-anchor="middle" letter-spacing="0.5">TARGET</text>
+
+          <!-- Stop Loss indicator below sweep low -->
+          <line x1="598" y1="365" x2="618" y2="365" stroke="#ff3b5c" stroke-width="1.5"/>
+          <line x1="598" y1="365" x2="604" y2="360" stroke="#ff3b5c" stroke-width="1.5"/>
+          <line x1="598" y1="365" x2="604" y2="370" stroke="#ff3b5c" stroke-width="1.5"/>
+          <text x="623" y="369" fill="#ff3b5c" font-family="DM Mono, monospace" font-size="9" opacity="0.7">SL</text>
+
+          <!-- Entry line -->
+          <line x1="598" y1="248" x2="618" y2="248" stroke="#5b8af5" stroke-width="1.5"/>
+          <text x="623" y="252" fill="#5b8af5" font-family="DM Mono, monospace" font-size="9" opacity="0.7">ENTRY</text>
+
+          <!-- X-axis time labels -->
+          <text x="100" y="412" fill="#7a8194" font-family="DM Mono, monospace" font-size="9.5" text-anchor="middle">04:00</text>
+          <text x="220" y="412" fill="#7a8194" font-family="DM Mono, monospace" font-size="9.5" text-anchor="middle">07:00</text>
+          <text x="340" y="412" fill="#7a8194" font-family="DM Mono, monospace" font-size="9.5" text-anchor="middle">11:00</text>
+          <text x="450" y="412" fill="#7a8194" font-family="DM Mono, monospace" font-size="9.5" text-anchor="middle">13:00</text>
+          <text x="600" y="412" fill="#7a8194" font-family="DM Mono, monospace" font-size="9.5" text-anchor="middle">16:00</text>
+          <text x="770" y="412" fill="#7a8194" font-family="DM Mono, monospace" font-size="9.5" text-anchor="middle">18:00+</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps-label">7-Step Execution Flow</div>
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">
+          Mark Up the Session Range
+          <span class="time-badge" style="color:var(--session-green); background:var(--session-green-dim);">04:00–11:00 GMT+1</span>
+        </div>
+        <div class="step-desc">Identify the <strong>High</strong> and <strong>Low</strong> formed during the 4–11 AM GMT+1 session. This range becomes your entire framework — liquidity sits at both extremes.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">
+          Wait for a Liquidity Sweep
+        </div>
+        <div class="step-desc">Gold must <strong>wick the High or Low</strong> of the 4–11 AM range. This sweep takes out resting stop-losses and traps breakout traders, creating the fuel for reversal.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">
+          Order Block Takeout → Full Reversal
+        </div>
+        <div class="step-desc">An <strong>Order Block must be taken out</strong> with price showing a full reversal. This is your structural confirmation — smart money has engaged and flipped direction.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">
+          Identify the Imbalance (FVG)
+        </div>
+        <div class="step-desc">An <strong>imbalance / Fair Value Gap</strong> must exist. The preferred imbalance is on the <strong>candle that took out the Order Block</strong> — this is where price is most likely to return for a retest.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">
+          Reversal Must Happen in Kill Zone
+          <span class="time-badge" style="color:var(--cyan); background:var(--cyan-dim);">13:00–16:00 GMT+1</span>
+        </div>
+        <div class="step-desc">The Order Block reversal must occur <strong>between 13:00–16:00 GMT+1</strong>. This is the New York kill zone overlap — maximum volume and highest probability for institutional reversals.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <div class="step-title">
+          Set Limit Order Inside the Imbalance
+        </div>
+        <div class="step-desc">Place your <strong>limit order inside the imbalance</strong> (FVG). The actual trigger / fill <strong>can happen outside</strong> the 13:00–16:00 window — you're pre-positioned for the retest. Stop-loss below the sweep low.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-body">
+        <div class="step-title">
+          Target: Opposite Side of the Range
+          <span class="time-badge" style="color:var(--gold); background:var(--gold-dim);">💰 Take Profit</span>
+        </div>
+        <div class="step-desc">Target the <strong>High or Low of the 4–11 AM range</strong> — whichever is the opposite end from the sweep. If Low was swept → target the High. If High was swept → target the Low.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM RULES -->
+  <div class="steps-label">Edge Notes</div>
+  <div class="rules-strip">
+    <div class="mini-rule">
+      <div class="mr-icon" style="background:var(--gold-dim); color:var(--gold);">⏱</div>
+      <div>
+        <div class="mr-title">Time is a Filter</div>
+        <div class="mr-desc">If the reversal doesn't form inside 13:00–16:00, there's no trade. The session overlap is a non-negotiable confluence.</div>
+      </div>
+    </div>
+    <div class="mini-rule">
+      <div class="mr-icon" style="background:var(--purple-dim); color:var(--purple);">◧</div>
+      <div>
+        <div class="mr-title">Imbalance = Entry Zone</div>
+        <div class="mr-desc">The FVG on the OB-breaking candle is the highest-probability re-entry. Price fills the gap before continuing.</div>
+      </div>
+    </div>
+    <div class="mini-rule">
+      <div class="mr-icon" style="background:var(--red-dim); color:var(--red);">⛨</div>
+      <div>
+        <div class="mr-title">Sweep = Fuel</div>
+        <div class="mr-desc">No wick beyond the range = no trade. The liquidity grab is what powers the reversal move back through the range.</div>
+      </div>
+    </div>
+    <div class="mini-rule">
+      <div class="mr-icon" style="background:var(--green-dim); color:var(--green);">⟷</div>
+      <div>
+        <div class="mr-title">Works Both Directions</div>
+        <div class="mr-desc">System is symmetrical. Sweep the high → short to the low. Sweep the low → long to the high. Same rules, mirrored.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">XAUUSD · Session Reversal System · For educational reference</div>
+
+</div>
+</body>
+</html>
