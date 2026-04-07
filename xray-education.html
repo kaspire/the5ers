@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Currency X-Ray — Education Series</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Chakra+Petch:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #030608;
+    --surface: #0c1015;
+    --surface2: #111820;
+    --border: #1a2230;
+    --accent: #00c896;
+    --accent-dim: rgba(0,200,150,0.12);
+    --accent-glow: rgba(0,200,150,0.06);
+    --red: #ff4466;
+    --text: #dde6f0;
+    --text-muted: #4a6070;
+    --text-dim: #7a90a0;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Chakra Petch', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,150,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,150,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 32px 80px; }
+
+  /* ── HEADER ── */
+  .header {
+    padding: 48px 0 40px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .header-left {}
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 30px;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.5;
+  }
+
+  .site-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 0.9;
+    letter-spacing: 0.04em;
+    color: #fff;
+  }
+
+  .site-title span { color: var(--accent); }
+
+  .header-right {
+    text-align: right;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+  }
+
+  /* ── NAV BUTTONS ── */
+  .nav-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.5s 0.15s ease both;
+  }
+
+  .nav-btn {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    min-width: 160px;
+    text-align: center;
+  }
+
+  .nav-btn::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+  }
+
+  .nav-btn:hover {
+    border-color: rgba(0,200,150,0.3);
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .nav-btn:hover::before { transform: scaleX(1); }
+
+  .nav-btn.active {
+    border-color: rgba(0,200,150,0.4);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .nav-btn.active::before { transform: scaleX(1); }
+
+  .nav-btn .btn-num {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.15em;
+  }
+
+  .nav-btn.active .btn-num { color: rgba(0,200,150,0.6); }
+
+  /* ── VIDEO PANEL ── */
+  .video-panel {
+    display: none;
+    animation: panelIn 0.4s ease both;
+  }
+
+  .video-panel.active { display: block; }
+
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Responsive video wrapper — 16:9, full width */
+  .video-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 */
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  .video-wrapper iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* ── VIDEO INFO ── */
+  .video-info {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+    margin-bottom: 48px;
+  }
+
+  .video-meta {}
+
+  .video-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    opacity: 0.7;
+  }
+
+  .video-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 3.5vw, 46px);
+    letter-spacing: 0.03em;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+
+  .video-desc {
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--text-dim);
+    max-width: 680px;
+  }
+
+  .video-desc p { margin-bottom: 12px; }
+  .video-desc p:last-child { margin-bottom: 0; }
+
+  /* Stats sidebar */
+  .video-stats {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    height: fit-content;
+  }
+
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-value:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+  .stat-value.accent { color: var(--accent); }
+
+  /* Progress dots */
+  .progress-dots {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+
+  .dot.done { background: var(--accent); }
+  .dot.current { background: var(--accent); box-shadow: 0 0 6px rgba(0,200,150,0.5); }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 48px 0 32px;
+  }
+
+  .section-divider-line { flex: 1; height: 1px; background: var(--border); }
+
+  .section-divider-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* ── INDICATOR CARDS ── */
+  .indicator-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+
+  .indicator-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .indicator-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transition: transform 0.25s ease;
+    transform-origin: bottom;
+  }
+
+  .indicator-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--accent-dim), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .indicator-card:hover { border-color: rgba(0,200,150,0.3); transform: translateY(-2px); background: var(--surface2); }
+  .indicator-card:hover::before { transform: scaleY(1); }
+  .indicator-card:hover::after { opacity: 1; }
+
+  .indicator-icon {
+    width: 48px; height: 48px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(0,200,150,0.2);
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px;
+    position: relative; z-index: 1;
+  }
+
+  .indicator-body { flex: 1; position: relative; z-index: 1; }
+
+  .indicator-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(0,200,150,0.5);
+    margin-bottom: 5px;
+  }
+
+  .indicator-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 5px;
+    line-height: 1.2;
+  }
+
+  .indicator-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .indicator-arrow {
+    font-size: 18px;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    position: relative; z-index: 1;
+    font-family: monospace;
+  }
+
+  .indicator-card:hover .indicator-arrow { color: var(--accent); transform: translateX(4px); }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+
+  .footer-brand span { color: var(--accent); }
+
+  .footer-copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .video-info { grid-template-columns: 1fr; }
+    .indicator-grid { grid-template-columns: 1fr; }
+    .header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .header-right { text-align: left; }
+  }
+
+  @media (max-width: 600px) {
+    .page { padding: 0 16px 60px; }
+    .nav-btn { min-width: 140px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="eyebrow">Education Series</div>
+      <div class="site-title">The Currency <span>X-Ray</span></div>
+    </div>
+    <div class="header-right">
+      FX King Trading<br>
+      5-Part Video Series<br>
+      <span style="color:var(--accent)">28 FX Pairs · Two Indicators · One System</span>
+    </div>
+  </div>
+
+  <!-- NAV BUTTONS -->
+  <div class="nav-bar">
+    <button class="nav-btn active" onclick="showVideo(1)">
+      <span class="btn-num">Video 01 · 9:50</span>
+      Office Setup
+    </button>
+    <button class="nav-btn" onclick="showVideo(2)">
+      <span class="btn-num">Video 02 · 5:50</span>
+      The Why?
+    </button>
+    <button class="nav-btn" onclick="showVideo(3)">
+      <span class="btn-num">Video 03 · 16:00</span>
+      Templates
+    </button>
+    <button class="nav-btn" onclick="showVideo(4)">
+      <span class="btn-num">Video 04 · 42:19</span>
+      The Engines
+    </button>
+    <button class="nav-btn" onclick="showVideo(5)">
+      <span class="btn-num">Video 05 · 8:14</span>
+      Trade Examples
+    </button>
+  </div>
+
+  <!-- VIDEO 1 -->
+  <div class="video-panel active" id="panel-1">
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube-nocookie.com/embed/koDnkovlIjo?si=XicYr5xm6F5_7-Ob"
+        title="The Currency X-Ray - 1 - Build Your Trading Office"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="video-info">
+      <div class="video-meta">
+        <div class="video-tag">Video 01 of 05 · Office Setup</div>
+        <div class="video-title">Build Your Trading Office</div>
+        <div class="video-desc">
+          <p>Before you trade a single pair, your environment needs to be right.</p>
+          <p>In this video we set up TradingView the professional way — clean, structured, and built for serious traders. You'll learn how to organise your watchlist with sections, flags, and notes, how to use the screenshot tool for your trade journal, and how to strip out everything that doesn't serve your edge.</p>
+          <p>This is your cockpit. Let's build it properly.</p>
+        </div>
+      </div>
+      <div class="video-stats">
+        <div class="progress-dots">
+          <div class="dot current"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="stat-label">Duration</div>
+        <div class="stat-value">9 min 50 sec</div>
+        <div class="stat-label">Topic</div>
+        <div class="stat-value">TradingView Setup</div>
+        <div class="stat-label">You Will Learn</div>
+        <div class="stat-value accent">Watchlist · Sections · Flags · Notes · Journaling</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO 2 -->
+  <div class="video-panel" id="panel-2">
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube-nocookie.com/embed/JrKAbrb41Zo?si=S-dFNsM_JyttLfm0"
+        title="The Currency X-Ray - 2 - Who Are You As A Trader?"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="video-info">
+      <div class="video-meta">
+        <div class="video-tag">Video 02 of 05 · Mindset & Identity</div>
+        <div class="video-title">Who Are You As A Trader?</div>
+        <div class="video-desc">
+          <p>Most traders fail before they ever place a trade — because they don't know who they are.</p>
+          <p>Are you a Day Trader? Swing Trader? Position Trader? Do you have a weekly target? Can you hold your % on a bad week without breaking your rules?</p>
+          <p>This video cuts through the noise. Trading is not a casino. It's a war — and every war requires the right equipment, the right mindset, and a plan you actually believe in. When you have that, the preparation becomes effortless.</p>
+          <p>We also cover how to find the best entries once your foundation is solid.</p>
+        </div>
+      </div>
+      <div class="video-stats">
+        <div class="progress-dots">
+          <div class="dot done"></div>
+          <div class="dot current"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="stat-label">Duration</div>
+        <div class="stat-value">5 min 50 sec</div>
+        <div class="stat-label">Topic</div>
+        <div class="stat-value">Trader Identity</div>
+        <div class="stat-label">You Will Learn</div>
+        <div class="stat-value accent">Trader Type · Targets · Mindset · Best Entries</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO 3 -->
+  <div class="video-panel" id="panel-3">
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube-nocookie.com/embed/IU5k09J55GU?si=4tJh1m4MllsEZiaI"
+        title="The Currency X-Ray - 3 - TradingView Templates & Indicator Walkthrough"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="video-info">
+      <div class="video-meta">
+        <div class="video-tag">Video 03 of 05 · Templates & Setup</div>
+        <div class="video-title">TradingView Templates & Indicator Walkthrough</div>
+        <div class="video-desc">
+          <p>Managing 28 pairs doesn't have to be chaos.</p>
+          <p>In this video you'll learn how to create and save templates in TradingView so you can flip through all 28 major FX crosses using 10 pre-set layouts — instantly. We then walk through the FX King Equalizer (Currency Strength with a Twist) in full detail, so you understand exactly what it's telling you and why.</p>
+          <p>Set this up once. Use it every single session.</p>
+        </div>
+      </div>
+      <div class="video-stats">
+        <div class="progress-dots">
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot current"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="stat-label">Duration</div>
+        <div class="stat-value">16 min 00 sec</div>
+        <div class="stat-label">Topic</div>
+        <div class="stat-value">Templates · FX King Equalizer</div>
+        <div class="stat-label">You Will Learn</div>
+        <div class="stat-value accent">10 Templates · 28 Pairs · Indicator Setup</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO 4 -->
+  <div class="video-panel" id="panel-4">
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube-nocookie.com/embed/fPWs8nKBBNs?si=Eemo9LRF0-96n5wa"
+        title="The Currency X-Ray - 4 - How To Use The Two Engines"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="video-info">
+      <div class="video-meta">
+        <div class="video-tag">Video 04 of 05 · The Core System</div>
+        <div class="video-title">How To Use The Two Engines</div>
+        <div class="video-desc">
+          <p>This is the core of the system.</p>
+          <p>We walk through the full setup of the FX King Equalizer and the FX Base Strength Dashboard — and then follow a real trade from start to finish. You'll see exactly how to read both indicators together, what to look for, and how to think through the decision.</p>
+          <p>We also show you how to build your own strength meter for any market or asset class — not just FX.</p>
+          <p>If you only watch one video in this series, make it this one.</p>
+        </div>
+      </div>
+      <div class="video-stats">
+        <div class="progress-dots">
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot current"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="stat-label">Duration</div>
+        <div class="stat-value">42 min 19 sec</div>
+        <div class="stat-label">Topic</div>
+        <div class="stat-value">Both Indicators · Real Trade</div>
+        <div class="stat-label">You Will Learn</div>
+        <div class="stat-value accent">Full System · Live Analysis · Any Market</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO 5 -->
+  <div class="video-panel" id="panel-5">
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube-nocookie.com/embed/4OhgxZ_GVeo?si=eoN0E3_k24L4fN8y"
+        title="The Currency X-Ray - 5 - Live Trade Examples: AUDJPY & NZDUSD"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="video-info">
+      <div class="video-meta">
+        <div class="video-tag">Video 05 of 05 · Trade Examples</div>
+        <div class="video-title">Live Trade Examples: AUDJPY & NZDUSD</div>
+        <div class="video-desc">
+          <p>Theory is nothing without execution.</p>
+          <p>In this video we walk through two complete trade examples — AUDJPY and NZDUSD — from the moment the pair catches our attention all the way to the actual entry. Every step is explained: what we see, what we wait for, and why we pull the trigger.</p>
+          <p>This is The Currency X-Ray system in action.</p>
+        </div>
+      </div>
+      <div class="video-stats">
+        <div class="progress-dots">
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot done"></div>
+          <div class="dot current"></div>
+        </div>
+        <div class="stat-label">Duration</div>
+        <div class="stat-value">8 min 14 sec</div>
+        <div class="stat-label">Topic</div>
+        <div class="stat-value">AUDJPY · NZDUSD</div>
+        <div class="stat-label">You Will Learn</div>
+        <div class="stat-value accent">Attention → Setup → Entry · Full Walkthrough</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INDICATOR SECTION -->
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-label">The Two Indicators</div>
+    <div class="section-divider-line"></div>
+  </div>
+
+  <div class="indicator-grid">
+    <a class="indicator-card" href="https://www.tradingview.com/script/RC8YmptI-FX-King-Equalizer/" target="_blank">
+      <div class="indicator-icon">📊</div>
+      <div class="indicator-body">
+        <div class="indicator-tag">Indicator 01 · TradingView</div>
+        <div class="indicator-name">FX King Equalizer</div>
+        <div class="indicator-sub">Currency Strength with a Twist — All 8 Majors Ranked</div>
+      </div>
+      <div class="indicator-arrow">→</div>
+    </a>
+    <a class="indicator-card" href="https://www.tradingview.com/script/8WULtePe-FX-Base-Strength-Dashboard/" target="_blank">
+      <div class="indicator-icon">🔬</div>
+      <div class="indicator-body">
+        <div class="indicator-tag">Indicator 02 · TradingView</div>
+        <div class="indicator-name">FX Base Strength Dashboard</div>
+        <div class="indicator-sub">X-Ray Your Currency Across Every Cross It Touches</div>
+      </div>
+      <div class="indicator-arrow">→</div>
+    </a>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-brand">FX King <span>Trading</span></div>
+    <div class="footer-copy">The Currency X-Ray · Education Series · 5 Videos</div>
+  </div>
+
+</div>
+
+<script>
+  function showVideo(num) {
+    // Hide all panels
+    document.querySelectorAll('.video-panel').forEach(p => p.classList.remove('active'));
+    // Deactivate all buttons
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    // Show selected
+    document.getElementById('panel-' + num).classList.add('active');
+    // Activate button
+    document.querySelectorAll('.nav-btn')[num - 1].classList.add('active');
+    // Scroll to top of nav
+    document.querySelector('.nav-bar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+</script>
+
+</body>
+</html>
