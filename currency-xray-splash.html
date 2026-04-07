@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Chakra+Petch:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #000; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Chakra Petch', sans-serif; overflow: hidden; }
+  .scene { position: relative; width: 1280px; height: 720px; background: #030608; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(0,200,150,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,150,0.04) 1px, transparent 1px); background-size: 60px 60px; }
+  .scanline { position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(0,200,150,0.6), transparent); animation: scan 4s linear infinite; z-index: 2; }
+  @keyframes scan { from { top: 0; opacity: 1; } to { top: 100%; opacity: 0.3; } }
+  .chart-bg { position: absolute; bottom: 0; left: 0; right: 0; height: 280px; opacity: 0.07; }
+  .bars-left { position: absolute; left: 40px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; opacity: 0.5; }
+  .bar-row { display: flex; align-items: center; gap: 8px; }
+  .bar-label { font-family: 'Space Mono', monospace; font-size: 10px; color: #5a7a6a; width: 28px; text-align: right; }
+  .bar-track { width: 120px; height: 6px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; animation: barGrow 1.5s ease both; }
+  @keyframes barGrow { from { width: 0; } }
+  .bar-val { font-family: 'Space Mono', monospace; font-size: 9px; width: 36px; }
+  .bars-right { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; opacity: 0.5; align-items: flex-end; }
+  .bar-row-r { display: flex; align-items: center; gap: 8px; flex-direction: row-reverse; }
+  .glow-bg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 300px; background: radial-gradient(ellipse, rgba(0,200,150,0.06) 0%, transparent 70%); pointer-events: none; z-index: 3; }
+  .corner { position: absolute; width: 32px; height: 32px; opacity: 0.4; }
+  .corner-tl { top: 20px; left: 20px; border-top: 1px solid #00c896; border-left: 1px solid #00c896; }
+  .corner-tr { top: 20px; right: 20px; border-top: 1px solid #00c896; border-right: 1px solid #00c896; }
+  .corner-bl { bottom: 20px; left: 20px; border-bottom: 1px solid #00c896; border-left: 1px solid #00c896; }
+  .corner-br { bottom: 20px; right: 20px; border-bottom: 1px solid #00c896; border-right: 1px solid #00c896; }
+  .tickers { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; opacity: 0.3; z-index: 5; }
+  .ticker { font-family: 'Space Mono', monospace; font-size: 9px; color: #00c896; padding: 3px 8px; border: 1px solid rgba(0,200,150,0.2); border-radius: 2px; letter-spacing: 0.05em; }
+  .ticker.neg { color: #ff4466; border-color: rgba(255,68,102,0.2); }
+  .center { position: relative; z-index: 10; text-align: center; padding: 0 120px; animation: fadeIn 0.8s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .eyebrow { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.35em; color: #00c896; text-transform: uppercase; margin-bottom: 18px; display: flex; align-items: center; justify-content: center; gap: 12px; animation: fadeIn 0.8s 0.2s ease both; opacity: 0; animation-fill-mode: forwards; }
+  .eyebrow::before { content: ''; width: 40px; height: 1px; background: linear-gradient(90deg, transparent, #00c896); }
+  .eyebrow::after { content: ''; width: 40px; height: 1px; background: linear-gradient(90deg, #00c896, transparent); }
+  .title { font-family: 'Bebas Neue', sans-serif; font-size: 110px; line-height: 0.92; letter-spacing: 0.04em; color: #fff; text-transform: uppercase; animation: fadeIn 0.8s 0.35s ease both; opacity: 0; animation-fill-mode: forwards; }
+  .title .x-ray { color: #00c896; position: relative; display: inline-block; }
+  .title .x-ray::after { content: 'X-Ray'; position: absolute; inset: 0; color: #00c896; filter: blur(18px); opacity: 0.5; animation: glowPulse 3s ease infinite; }
+  @keyframes glowPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.8; } }
+  .subtitle { font-family: 'Chakra Petch', sans-serif; font-size: 22px; font-weight: 300; letter-spacing: 0.25em; color: rgba(255,255,255,0.45); text-transform: uppercase; margin-top: 16px; animation: fadeIn 0.8s 0.5s ease both; opacity: 0; animation-fill-mode: forwards; }
+  .subtitle em { color: rgba(255,255,255,0.75); font-style: normal; font-weight: 600; }
+  .divider { display: flex; align-items: center; gap: 16px; margin: 28px auto; width: 400px; animation: fadeIn 0.8s 0.65s ease both; opacity: 0; animation-fill-mode: forwards; }
+  .div-line { flex: 1; height: 1px; background: rgba(0,200,150,0.2); }
+  .div-diamond { width: 8px; height: 8px; background: #00c896; transform: rotate(45deg); opacity: 0.7; }
+  .tags { display: flex; justify-content: center; gap: 12px; margin-top: 8px; animation: fadeIn 0.8s 0.75s ease both; opacity: 0; animation-fill-mode: forwards; }
+  .tag { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; padding: 5px 14px; border: 1px solid rgba(0,200,150,0.2); border-radius: 2px; color: rgba(0,200,150,0.7); background: rgba(0,200,150,0.04); }
+  .bottom-strip { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.2em; color: rgba(255,255,255,0.15); text-transform: uppercase; white-space: nowrap; z-index: 5; }
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="grid"></div>
+  <div class="scanline"></div>
+  <div class="glow-bg"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+  <div class="tickers">
+    <span class="ticker">EURUSD +0.42%</span>
+    <span class="ticker neg">GBPUSD -0.18%</span>
+    <span class="ticker">AUDUSD +0.61%</span>
+    <span class="ticker neg">USDJPY -0.33%</span>
+    <span class="ticker">NZDUSD +0.27%</span>
+    <span class="ticker neg">USDCHF -0.09%</span>
+    <span class="ticker">USDCAD +0.14%</span>
+    <span class="ticker neg">EURGBP -0.22%</span>
+  </div>
+  <div class="bars-left">
+    <div class="bar-row"><span class="bar-label">AUD</span><div class="bar-track"><div class="bar-fill" style="width:82%;background:#00c896;animation-delay:0.1s"></div></div><span class="bar-val" style="color:#00c896">+0.82</span></div>
+    <div class="bar-row"><span class="bar-label">EUR</span><div class="bar-track"><div class="bar-fill" style="width:71%;background:#00c896;animation-delay:0.2s"></div></div><span class="bar-val" style="color:#00c896">+0.71</span></div>
+    <div class="bar-row"><span class="bar-label">GBP</span><div class="bar-track"><div class="bar-fill" style="width:58%;background:#00c896;animation-delay:0.3s"></div></div><span class="bar-val" style="color:#00c896">+0.58</span></div>
+    <div class="bar-row"><span class="bar-label">NZD</span><div class="bar-track"><div class="bar-fill" style="width:44%;background:#aaa;animation-delay:0.4s"></div></div><span class="bar-val" style="color:#888">+0.44</span></div>
+    <div class="bar-row"><span class="bar-label">CAD</span><div class="bar-track"><div class="bar-fill" style="width:31%;background:#aaa;animation-delay:0.5s"></div></div><span class="bar-val" style="color:#888">+0.31</span></div>
+    <div class="bar-row"><span class="bar-label">CHF</span><div class="bar-track"><div class="bar-fill" style="width:22%;background:#ff4466;animation-delay:0.6s"></div></div><span class="bar-val" style="color:#ff4466">-0.22</span></div>
+    <div class="bar-row"><span class="bar-label">JPY</span><div class="bar-track"><div class="bar-fill" style="width:38%;background:#ff4466;animation-delay:0.7s"></div></div><span class="bar-val" style="color:#ff4466">-0.38</span></div>
+    <div class="bar-row"><span class="bar-label">USD</span><div class="bar-track"><div class="bar-fill" style="width:65%;background:#ff4466;animation-delay:0.8s"></div></div><span class="bar-val" style="color:#ff4466">-0.65</span></div>
+  </div>
+  <div class="bars-right">
+    <div class="bar-row-r"><span class="bar-label" style="text-align:left">EUR</span><div class="bar-track"><div class="bar-fill" style="width:88%;background:#00c896;animation-delay:0.15s"></div></div><span class="bar-val">✓ STRONG</span></div>
+    <div class="bar-row-r"><span class="bar-label" style="text-align:left">AUD</span><div class="bar-track"><div class="bar-fill" style="width:74%;background:#00c896;animation-delay:0.25s"></div></div><span class="bar-val">✓ STRONG</span></div>
+    <div class="bar-row-r"><span class="bar-label" style="text-align:left">GBP</span><div class="bar-track"><div class="bar-fill" style="width:55%;background:#00c896;animation-delay:0.35s"></div></div><span class="bar-val">✓ MIXED</span></div>
+    <div class="bar-row-r"><span class="bar-label" style="text-align:left">NZD</span><div class="bar-track"><div class="bar-fill" style="width:48%;background:#aaa;animation-delay:0.45s"></div></div><span class="bar-val">NEUTRAL</span></div>
+    <div class="bar-row-r"><span class="bar-label" style="text-align:left">CAD</span><div class="bar-track"><div class="bar-fill" style="width:35%;background:#aaa;animation-delay:0.55s"></div></div><span class="bar-val">NEUTRAL</span></div>
+    <div class="bar-row-r"><span class="bar-label" style="text-align:left">JPY</span><div class="bar-track"><div class="bar-fill" style="width:28%;background:#ff4466;animation-delay:0.65s"></div></div><span class="bar-val" style="color:#ff4466">✗ WEAK</span></div>
+    <div class="bar-row-r"><span class="bar-label" style="text-align:left">CHF</span><div class="bar-track"><div class="bar-fill" style="width:44%;background:#ff4466;animation-delay:0.75s"></div></div><span class="bar-val" style="color:#ff4466">✗ WEAK</span></div>
+    <div class="bar-row-r"><span class="bar-label" style="text-align:left">USD</span><div class="bar-track"><div class="bar-fill" style="width:68%;background:#ff4466;animation-delay:0.85s"></div></div><span class="bar-val" style="color:#ff4466">✗ WEAK</span></div>
+  </div>
+  <svg class="chart-bg" viewBox="0 0 1280 280" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="#00c896" stroke-width="1" fill="none">
+      <line x1="60" y1="200" x2="60" y2="100"/><rect x="54" y="130" width="12" height="50" fill="#00c896"/>
+      <line x1="100" y1="190" x2="100" y2="90"/><rect x="94" y="110" width="12" height="60" fill="#00c896"/>
+      <line x1="140" y1="180" x2="140" y2="80"/><rect x="134" y="100" width="12" height="55" fill="none" stroke="#ff4466"/>
+      <line x1="180" y1="170" x2="180" y2="70"/><rect x="174" y="90" width="12" height="50" fill="#00c896"/>
+      <line x1="220" y1="200" x2="220" y2="110"/><rect x="214" y="130" width="12" height="45" fill="none" stroke="#ff4466"/>
+      <line x1="260" y1="210" x2="260" y2="120"/><rect x="254" y="140" width="12" height="40" fill="#00c896"/>
+      <line x1="300" y1="190" x2="300" y2="100"/><rect x="294" y="120" width="12" height="50" fill="none" stroke="#ff4466"/>
+      <line x1="340" y1="180" x2="340" y2="85"/><rect x="334" y="105" width="12" height="55" fill="#00c896"/>
+      <line x1="380" y1="170" x2="380" y2="75"/><rect x="374" y="100" width="12" height="45" fill="#00c896"/>
+      <line x1="420" y1="160" x2="420" y2="70"/><rect x="414" y="90" width="12" height="50" fill="none" stroke="#ff4466"/>
+      <line x1="460" y1="190" x2="460" y2="90"/><rect x="454" y="115" width="12" height="55" fill="#00c896"/>
+      <line x1="500" y1="200" x2="500" y2="100"/><rect x="494" y="125" width="12" height="50" fill="none" stroke="#ff4466"/>
+      <line x1="540" y1="180" x2="540" y2="80"/><rect x="534" y="105" width="12" height="50" fill="#00c896"/>
+      <line x1="580" y1="160" x2="580" y2="65"/><rect x="574" y="85" width="12" height="50" fill="#00c896"/>
+      <line x1="620" y1="150" x2="620" y2="60"/><rect x="614" y="80" width="12" height="45" fill="none" stroke="#ff4466"/>
+      <line x1="660" y1="170" x2="660" y2="80"/><rect x="654" y="100" width="12" height="50" fill="#00c896"/>
+      <line x1="700" y1="185" x2="700" y2="90"/><rect x="694" y="115" width="12" height="50" fill="none" stroke="#ff4466"/>
+      <line x1="740" y1="175" x2="740" y2="80"/><rect x="734" y="105" width="12" height="45" fill="#00c896"/>
+      <line x1="780" y1="165" x2="780" y2="70"/><rect x="774" y="90" width="12" height="50" fill="#00c896"/>
+      <line x1="820" y1="190" x2="820" y2="95"/><rect x="814" y="120" width="12" height="45" fill="none" stroke="#ff4466"/>
+      <line x1="860" y1="180" x2="860" y2="85"/><rect x="854" y="110" width="12" height="50" fill="#00c896"/>
+      <line x1="900" y1="200" x2="900" y2="105"/><rect x="894" y="130" width="12" height="45" fill="none" stroke="#ff4466"/>
+      <line x1="940" y1="185" x2="940" y2="90"/><rect x="934" y="115" width="12" height="48" fill="#00c896"/>
+      <line x1="980" y1="170" x2="980" y2="75"/><rect x="974" y="100" width="12" height="46" fill="#00c896"/>
+      <line x1="1020" y1="160" x2="1020" y2="65"/><rect x="1014" y="88" width="12" height="50" fill="none" stroke="#ff4466"/>
+      <line x1="1060" y1="180" x2="1060" y2="85"/><rect x="1054" y="110" width="12" height="48" fill="#00c896"/>
+      <line x1="1100" y1="195" x2="1100" y2="100"/><rect x="1094" y="125" width="12" height="46" fill="none" stroke="#ff4466"/>
+      <line x1="1140" y1="180" x2="1140" y2="85"/><rect x="1134" y="110" width="12" height="50" fill="#00c896"/>
+      <line x1="1180" y1="170" x2="1180" y2="75"/><rect x="1174" y="100" width="12" height="46" fill="#00c896"/>
+      <line x1="1220" y1="185" x2="1220" y2="90"/><rect x="1214" y="118" width="12" height="44" fill="none" stroke="#ff4466"/>
+    </g>
+    <polyline points="60,155 200,135 380,112 600,88 900,80 1220,62" stroke="#00c896" stroke-width="1.5" fill="none" stroke-dasharray="4,6" opacity="0.5"/>
+  </svg>
+  <div class="center">
+    <div class="eyebrow">Webinar Series</div>
+    <div class="title">The Currency<br><span class="x-ray">X-Ray</span></div>
+    <div class="subtitle">What Other Traders <em>Can't</em> See</div>
+    <div class="divider"><div class="div-line"></div><div class="div-diamond"></div><div class="div-line"></div></div>
+    <div class="tags">
+      <span class="tag">28 FX Pairs</span>
+      <span class="tag">Strength Meter</span>
+      <span class="tag">Base Dashboard</span>
+      <span class="tag">Real-Time Ranking</span>
+    </div>
+  </div>
+  <div class="bottom-strip">Currency Strength Meter · FX Base Strength Dashboard · Two-Layer Analysis System</div>
+</div>
+</body>
+</html>
