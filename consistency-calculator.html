@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consistency Calculator — Futures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0d10;--panel:#12171c;--panel-2:#161c23;--line:#232c35;--line-soft:#1b232b;
+    --txt:#e7ebee;--muted:#8b96a1;--muted-2:#5f6a75;--gold:#d8b15a;--gold-dim:#9c7e3d;
+    --green:#34c77b;--green-dim:#1c7a4c;--red:#e5565b;--red-dim:#7d2e31;--blue:#5aa6d8;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;--sans:'IBM Plex Sans',system-ui,sans-serif;
+    --disp:'Archivo','IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--txt);font-family:var(--sans)}
+  body{
+    min-height:100vh;padding:32px 20px 60px;
+    background-image:
+      radial-gradient(900px 500px at 85% -8%, rgba(216,177,90,.07), transparent 60%),
+      radial-gradient(700px 500px at 8% 4%, rgba(90,166,216,.05), transparent 55%),
+      linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+    background-size:auto,auto,42px 42px,42px 42px;
+  }
+  .wrap{max-width:1120px;margin:0 auto}
+  header{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between;
+    padding-bottom:22px;border-bottom:1px solid var(--line);margin-bottom:26px;animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+  .brand .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  .brand h1{font-family:var(--disp);font-weight:800;font-size:clamp(26px,4vw,40px);letter-spacing:-.02em;line-height:1}
+  .brand p{color:var(--muted);font-size:13.5px;margin-top:9px;max-width:48ch;line-height:1.5}
+  .controls{display:flex;flex-direction:column;gap:12px;align-items:flex-end}
+  .seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+  .seg button{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:.03em;color:var(--muted);
+    background:transparent;border:0;cursor:pointer;padding:9px 18px;border-radius:9px;transition:.18s}
+  .seg button .sub{display:block;font-family:var(--mono);font-weight:400;font-size:10px;letter-spacing:.05em;color:var(--muted-2);margin-top:2px}
+  .seg button.active{background:linear-gradient(180deg,#1c242c,#141a20);color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold-dim)}
+  .seg button.active .sub{color:var(--gold-dim)}
+  .segwrap{display:flex;align-items:center;gap:11px;justify-content:flex-end}
+  .segcap{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);width:62px;text-align:right;flex:none}
+  .chiprow{display:flex;gap:8px}
+  .rulechip{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:7px 12px;background:var(--panel)}
+  .rulechip b{color:var(--gold);font-weight:600}
+  .rulechip.eod b{color:var(--red)}
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:22px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:16px;padding:22px;animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+  .card h2{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:9px}
+  .card h2::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+  .field{margin-bottom:14px}
+  label.lbl{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .inrow{display:flex;gap:9px}
+  .money{position:relative;flex:1}
+  .money::before{content:"$";position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted-2);font-family:var(--mono);font-size:15px}
+  input[type=number],input[type=text]{width:100%;background:#0c1115;border:1px solid var(--line);border-radius:10px;color:var(--txt);font-family:var(--mono);font-size:16px;padding:13px 13px 13px 26px;outline:none;transition:.15s}
+  input[type=text]{padding-left:13px}
+  input:focus{border-color:var(--gold-dim);box-shadow:0 0 0 3px rgba(216,177,90,.12)}
+  .addbtn{font-family:var(--disp);font-weight:700;font-size:14px;letter-spacing:.04em;background:linear-gradient(180deg,#e4bd66,#c69a3f);color:#1a1305;border:0;border-radius:10px;padding:0 20px;cursor:pointer;transition:.16s;white-space:nowrap}
+  .addbtn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .addbtn:active{transform:translateY(0)}
+  .quick{display:flex;gap:7px;margin-top:4px}
+  .quick button{flex:1;font-family:var(--mono);font-size:12px;color:var(--muted);background:#0c1115;border:1px solid var(--line);border-radius:8px;padding:8px;cursor:pointer;transition:.15s}
+  .quick button:hover{border-color:var(--gold-dim);color:var(--gold)}
+  .list{margin-top:6px;display:flex;flex-direction:column;gap:7px;max-height:300px;overflow:auto}
+  .list::-webkit-scrollbar{width:8px}
+  .list::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+  .row{display:flex;align-items:center;gap:10px;background:#0c1115;border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;animation:pop .25s ease both}
+  .row .tag{font-family:var(--mono);font-size:11px;color:var(--muted-2);width:62px;flex:none}
+  .row.best .tag{color:var(--gold)}
+  .row .val{font-family:var(--mono);font-size:15px;font-weight:500;margin-left:auto}
+  .row .val.pos{color:var(--green)} .row .val.neg{color:var(--red)}
+  .row .star{font-size:11px;color:var(--gold);font-family:var(--mono);letter-spacing:.05em}
+  .row .x{background:none;border:0;color:var(--muted-2);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;transition:.15s}
+  .row .x:hover{color:var(--red)}
+  .empty{color:var(--muted-2);font-family:var(--mono);font-size:12.5px;text-align:center;padding:26px 0;border:1px dashed var(--line);border-radius:10px}
+  .listfoot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-soft)}
+  .listfoot span{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .reset{background:none;border:1px solid var(--line);border-radius:8px;color:var(--muted);font-family:var(--mono);font-size:11px;padding:7px 12px;cursor:pointer;transition:.15s}
+  .reset:hover{border-color:var(--red-dim);color:var(--red)}
+  .statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px}
+  .stat{background:#0c1115;border:1px solid var(--line);border-radius:12px;padding:15px 16px;position:relative;overflow:hidden}
+  .stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .stat .v{font-family:var(--mono);font-size:24px;font-weight:600;letter-spacing:-.01em;line-height:1}
+  .stat .meta{font-family:var(--mono);font-size:11px;color:var(--muted-2);margin-top:7px}
+  .v.pos{color:var(--green)} .v.neg{color:var(--red)} .v.gold{color:var(--gold)}
+  .banner{display:flex;align-items:center;gap:16px;border-radius:14px;padding:16px 18px;margin-bottom:18px;border:1px solid var(--line);background:#0c1115;transition:.3s}
+  .banner .dot{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:20px;font-weight:700}
+  .banner .bt{font-family:var(--disp);font-weight:800;font-size:17px;letter-spacing:.01em}
+  .banner .bs{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:3px}
+  .banner.ok{border-color:var(--green-dim);background:linear-gradient(90deg,rgba(52,199,123,.10),transparent)}
+  .banner.ok .dot{background:rgba(52,199,123,.16);color:var(--green)}
+  .banner.ok .bt{color:var(--green)}
+  .banner.bad{border-color:var(--red-dim);background:linear-gradient(90deg,rgba(229,86,91,.10),transparent)}
+  .banner.bad .dot{background:rgba(229,86,91,.16);color:var(--red)}
+  .banner.bad .bt{color:var(--red)}
+  .banner.wait .dot{background:#161c23;color:var(--muted)}
+  .banner.pass{border-color:var(--gold-dim);background:linear-gradient(90deg,rgba(216,177,90,.12),transparent)}
+  .banner.pass .dot{background:rgba(216,177,90,.18);color:var(--gold)}
+  .banner.pass .bt{color:var(--gold)}
+  .barwrap{margin-bottom:20px}
+  .barhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .barhead .t{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .barhead .r{font-family:var(--mono);font-size:14px;font-weight:600}
+  .track{position:relative;height:34px;background:#0c1115;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:8px 0 0 8px;transition:width .5s cubic-bezier(.2,.7,.2,1),background .3s}
+  .fill.ok{background:linear-gradient(90deg,rgba(52,199,123,.55),rgba(52,199,123,.30))}
+  .fill.bad{background:linear-gradient(90deg,rgba(229,86,91,.6),rgba(229,86,91,.32))}
+  .thresh{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--gold);box-shadow:0 0 10px var(--gold);z-index:3}
+  .thresh::after{content:"40% CAP";position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--gold);white-space:nowrap}
+  .barscale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted-2);margin-top:6px}
+  .guide{background:#0c1115;border:1px solid var(--line);border-radius:13px;padding:18px}
+  .guide .gh{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  .guide p{font-size:14px;line-height:1.62;color:var(--txt)}
+  .guide p + p{margin-top:10px}
+  .guide .num{font-family:var(--mono);font-weight:600;color:var(--gold)}
+  .guide .pos{color:var(--green);font-family:var(--mono);font-weight:500}
+  .guide .neg{color:var(--red);font-family:var(--mono);font-weight:500}
+  .actions{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+  .act{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;line-height:1.5;color:var(--muted)}
+  .act .ic{flex:none;width:18px;height:18px;border-radius:5px;background:#161c23;display:grid;place-items:center;font-family:var(--mono);font-size:11px;color:var(--gold);margin-top:1px}
+  .explain{margin-top:22px;animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+  .ex2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  @media(max-width:680px){.ex2{grid-template-columns:1fr}}
+  .exbox{background:#0c1115;border:1px solid var(--line);border-radius:13px;padding:18px}
+  .exbox.win{border-left:3px solid var(--green)}
+  .exbox.loss{border-left:3px solid var(--red)}
+  .exbox h3{font-family:var(--disp);font-weight:700;font-size:14px;margin-bottom:9px;display:flex;align-items:center;gap:8px}
+  .exbox.win h3{color:var(--green)} .exbox.loss h3{color:var(--red)}
+  .exbox p{font-size:13.5px;line-height:1.6;color:var(--muted)}
+  .exbox p b{color:var(--txt);font-weight:600}
+  .formula{font-family:var(--mono);font-size:13px;color:var(--gold);background:#0c1115;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;text-align:center;letter-spacing:.02em}
+  .foot{color:var(--muted-2);font-family:var(--mono);font-size:11px;text-align:center;margin-top:30px;line-height:1.6}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes pop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+  .d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.19s}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="eyebrow">Futures Evaluation · Risk Compliance</div>
+      <h1>Consistency Calculator</h1>
+      <p>Track the 40% consistency rule live as you log each trade. Your single best trade may never reach 40% of total net profit.</p>
+    </div>
+    <div class="controls">
+      <div class="segwrap">
+        <span class="segcap">Account</span>
+        <div class="seg" id="modeSeg">
+          <button data-mode="25k" class="active">25K<span class="sub">$25,000</span></button>
+          <button data-mode="50k">50K<span class="sub">$50,000</span></button>
+        </div>
+      </div>
+      <div class="segwrap">
+        <span class="segcap">Phase</span>
+        <div class="seg" id="phaseSeg">
+          <button data-phase="eval" class="active">Evaluation<span class="sub" id="subEval">6% · $1,500</span></button>
+          <button data-phase="funded">Funded<span class="sub" id="subFunded">10% · $2,500</span></button>
+        </div>
+      </div>
+      <div class="chiprow">
+        <div class="rulechip">CONSISTENCY (per trade) <b>40%</b></div>
+        <div class="rulechip eod">EOD DRAWDOWN <b id="eodVal">4% · $1,000</b></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: input -->
+    <section class="card d1">
+      <h2>Log Trades</h2>
+      <div class="field">
+        <label class="lbl" for="label">Label (optional)</label>
+        <input type="text" id="label" placeholder="Trade 1 · setup · etc.">
+      </div>
+      <div class="field">
+        <label class="lbl" for="pnl">Trade P&amp;L</label>
+        <div class="inrow">
+          <div class="money"><input type="number" id="pnl" placeholder="0.00" step="0.01"></div>
+          <button class="addbtn" id="addBtn">Add Trade</button>
+        </div>
+        <div class="quick">
+          <button data-sign="1">Win +</button>
+          <button data-sign="-1">Loss −</button>
+        </div>
+      </div>
+
+      <div class="list" id="list">
+        <div class="empty">No trades logged yet — add your first P&amp;L above.</div>
+      </div>
+
+      <div class="listfoot">
+        <span id="dayCount">0 trades · 0W / 0L</span>
+        <button class="reset" id="resetBtn">Reset all</button>
+      </div>
+    </section>
+
+    <!-- RIGHT: dashboard -->
+    <section class="card d2">
+      <h2>Status</h2>
+
+      <div class="banner wait" id="banner">
+        <div class="dot" id="bdot">—</div>
+        <div>
+          <div class="bt" id="btitle">Awaiting trades</div>
+          <div class="bs" id="bsub">Log trades to evaluate consistency.</div>
+        </div>
+      </div>
+
+      <div class="statgrid">
+        <div class="stat"><div class="k">Total Net P&amp;L</div><div class="v" id="sTotal">$0</div><div class="meta" id="sTarget">Target $1,500</div></div>
+        <div class="stat"><div class="k">Best Trade</div><div class="v gold" id="sBest">$0</div><div class="meta" id="sBestMeta">— of total</div></div>
+        <div class="stat"><div class="k">Consistency</div><div class="v" id="sRatio">—</div><div class="meta">cap 40%</div></div>
+        <div class="stat"><div class="k">Max Allowed Trade</div><div class="v gold" id="sMax">$0</div><div class="meta">40% of current total</div></div>
+      </div>
+
+      <div class="barwrap">
+        <div class="barhead">
+          <span class="t">Best trade as % of total</span>
+          <span class="r" id="barPct">—</span>
+        </div>
+        <div class="track">
+          <div class="fill ok" id="fill"></div>
+          <div class="thresh" style="left:40%"></div>
+        </div>
+        <div class="barscale"><span>0%</span><span>20%</span><span>40%</span><span>60%</span><span>80%</span><span>100%</span></div>
+      </div>
+
+      <div class="guide">
+        <div class="gh">Where you stand</div>
+        <div id="guideBody"><p style="color:var(--muted)">Add your trades and this panel will show exactly what you need to do to stay consistent.</p></div>
+        <div class="actions" id="actions"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Explainer -->
+  <section class="explain card d3">
+    <h2>How the 40% rule works</h2>
+    <p style="color:var(--muted);font-size:14px;line-height:1.6">
+      The consistency rule stops a trader from passing on one lucky trade. To clear it, profit must be <b style="color:var(--txt)">spread out</b> — no single trade can carry more than 40% of everything you've made. Because it measures each trade (not the day's net), it is stricter than a day-based rule: one fill can't dominate the account.
+    </p>
+    <div class="formula">Best Trade ÷ Total Net Profit&nbsp;&nbsp;&lt;&nbsp;&nbsp;40%&nbsp;&nbsp;&nbsp;⟶&nbsp;&nbsp;&nbsp;Total&nbsp;&gt;&nbsp;Best Trade&nbsp;×&nbsp;2.5</div>
+    <div class="ex2">
+      <div class="exbox win">
+        <h3>▲ Winning trades</h3>
+        <p>A winner grows your total — good for the target. But if <b>one</b> trade is far bigger than the rest, its share climbs toward and past the 40% cap. The fix is more winners of similar size, not one monster trade. Every additional winning trade raises the total, which <b>lowers</b> your best trade's percentage and pulls you back into compliance.</p>
+      </div>
+      <div class="exbox loss">
+        <h3>▼ Losing trades</h3>
+        <p>A loser shrinks your total net profit. Since your best trade is divided by a <b>smaller</b> total, its percentage goes <b>up</b> — so a loss makes consistency worse even though your best trade never changed. Recovering with several modest winners, rather than one large one, restores both the total and the ratio.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    25K &amp; 50K accounts · Evaluation 6% &amp; Funded 10% targets · 40% consistency (per trade) · 4% EOD drawdown.<br>
+    Educational tool — confirm exact targets and rules with your specific firm.
+  </div>
+</div>
+
+<script>
+const SIZES = { '25k':25000, '50k':50000 };
+const PHASE_PCT = { eval:0.06, funded:0.10 };
+const PHASE_LABEL = { eval:'Evaluation', funded:'Funded' };
+const CAP = 0.40;
+const EOD = 0.04;
+const state = { mode:'25k', phase:'eval', entries:[] };
+let uid = 0;
+
+const usd = (n,dec=0)=> (n<0?'-$':'$') + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+const pct = n => (n*100).toFixed(1)+'%';
+const $ = id => document.getElementById(id);
+
+/* Account toggle */
+$('modeSeg').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  state.mode = b.dataset.mode;
+  [...$('modeSeg').children].forEach(x=>x.classList.toggle('active', x===b));
+  render();
+});
+/* Phase toggle */
+$('phaseSeg').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  state.phase = b.dataset.phase;
+  [...$('phaseSeg').children].forEach(x=>x.classList.toggle('active', x===b));
+  render();
+});
+
+/* Add trade */
+function addTrade(){
+  const v = parseFloat($('pnl').value);
+  if(isNaN(v)){ $('pnl').focus(); return; }
+  uid++;
+  const label = $('label').value.trim() || ('Trade '+(state.entries.length+1));
+  state.entries.push({ id:uid, label, pnl:v });
+  $('pnl').value=''; $('label').value=''; $('pnl').focus();
+  render();
+}
+$('addBtn').addEventListener('click', addTrade);
+$('pnl').addEventListener('keydown', e=>{ if(e.key==='Enter') addTrade(); });
+$('label').addEventListener('keydown', e=>{ if(e.key==='Enter') $('pnl').focus(); });
+
+/* Quick sign helpers */
+document.querySelectorAll('.quick button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const cur = Math.abs(parseFloat($('pnl').value)||0);
+    if(cur>0){ $('pnl').value = (parseInt(b.dataset.sign)*cur); }
+    $('pnl').focus();
+  });
+});
+
+$('resetBtn').addEventListener('click', ()=>{ state.entries=[]; render(); });
+function removeTrade(id){ state.entries = state.entries.filter(e=>e.id!==id); render(); }
+
+function render(){
+  const E = state.entries;
+  const size = SIZES[state.mode];
+  const target = size * PHASE_PCT[state.phase];
+  $('subEval').textContent = '6% · '+usd(size*0.06);
+  $('subFunded').textContent = '10% · '+usd(size*0.10);
+  $('eodVal').textContent = '4% · '+usd(size*EOD);
+
+  const total = E.reduce((a,e)=>a+e.pnl,0);
+  const bestVal = E.length ? Math.max(...E.map(e=>e.pnl)) : 0;
+  const best = Math.max(0, bestVal);
+  const bestId = (()=>{ let id=null,m=-Infinity; E.forEach(e=>{ if(e.pnl>m){m=e.pnl;id=e.id;} }); return m>0?id:null; })();
+  const wins = E.filter(e=>e.pnl>0).length;
+  const losses = E.filter(e=>e.pnl<0).length;
+
+  const hasProfit = total>0 && best>0;
+  const ratio = hasProfit ? best/total : null;
+  const compliant = ratio===null ? null : ratio<CAP;            // strict: must be UNDER 40%
+  const maxAllowedBest = total>0 ? CAP*total : 0;
+  const minTotal = best>0 ? best/CAP : 0;
+  const addNeeded = Math.max(0, minTotal-total);
+  const toTarget = Math.max(0, target-total);
+  const maxNewTrade = total>0 ? (CAP/(1-CAP))*total : 0;        // largest brand-new trade staying <40%
+  const passed = total>=target && compliant===true;
+
+  /* Trade list */
+  const list = $('list');
+  if(!E.length){
+    list.innerHTML = '<div class="empty">No trades logged yet — add your first P&L above.</div>';
+  } else {
+    list.innerHTML = E.map((e,i)=>`
+      <div class="row ${e.id===bestId?'best':''}">
+        <span class="tag">${e.label||('Trade '+(i+1))}</span>
+        ${e.id===bestId?'<span class="star">★ BEST</span>':''}
+        <span class="val ${e.pnl>=0?'pos':'neg'}">${usd(e.pnl,2)}</span>
+        <button class="x" data-id="${e.id}" title="remove">×</button>
+      </div>`).join('');
+    list.querySelectorAll('.x').forEach(b=> b.addEventListener('click', ()=>removeTrade(+b.dataset.id)));
+  }
+  $('dayCount').textContent = `${E.length} trade${E.length!==1?'s':''} · ${wins}W / ${losses}L`;
+
+  /* Stats */
+  $('sTotal').textContent = usd(total, total%1?2:0);
+  $('sTotal').className = 'v '+(total>0?'pos':total<0?'neg':'');
+  $('sTarget').textContent = `${PHASE_LABEL[state.phase]} ${usd(target)} · ${toTarget>0? usd(toTarget)+' to go':'met ✓'}`;
+  $('sBest').textContent = usd(best, best%1?2:0);
+  $('sBestMeta').textContent = ratio!==null ? `${pct(ratio)} of total` : '— of total';
+  $('sRatio').textContent = ratio!==null ? pct(ratio) : '—';
+  $('sRatio').className = 'v '+(ratio===null?'':compliant?'pos':'neg');
+  $('sMax').textContent = usd(maxAllowedBest, maxAllowedBest%1?2:0);
+
+  /* Bar */
+  const shown = ratio!==null ? Math.min(ratio,1) : 0;
+  $('fill').style.width = (shown*100)+'%';
+  $('fill').className = 'fill '+(compliant===false?'bad':'ok');
+  $('barPct').textContent = ratio!==null ? pct(ratio) : '—';
+  $('barPct').style.color = ratio===null?'var(--muted)':compliant?'var(--green)':'var(--red)';
+
+  /* Banner */
+  const banner=$('banner'), bdot=$('bdot'), bt=$('btitle'), bs=$('bsub');
+  banner.className='banner';
+  if(!E.length || total<=0 || ratio===null){
+    banner.classList.add('wait'); bdot.textContent='—';
+    bt.textContent = total<0 ? 'Net negative' : 'Awaiting profit';
+    bs.textContent = total<0 ? 'Consistency applies to profit — get net positive first.' : 'Log winning trades to evaluate.';
+  } else if(passed){
+    banner.classList.add('pass'); bdot.textContent='✓';
+    bt.textContent='Conditions met';
+    bs.textContent='Profit target reached and best trade under the 40% cap.';
+  } else if(compliant){
+    banner.classList.add('ok'); bdot.textContent='✓';
+    bt.textContent='Consistent';
+    bs.textContent= toTarget>0 ? `Within cap. ${usd(toTarget)} left to reach target.` : 'Within the 40% cap.';
+  } else {
+    banner.classList.add('bad'); bdot.textContent='!';
+    bt.textContent='Not consistent';
+    bs.textContent=`Best trade is ${pct(ratio)} of total — at or over the 40% cap.`;
+  }
+
+  /* Guidance */
+  const g=$('guideBody'), acts=$('actions'); acts.innerHTML='';
+  const A = (n,txt)=>`<div class="act"><span class="ic">${n}</span><span>${txt}</span></div>`;
+
+  if(!E.length){
+    g.innerHTML = `<p style="color:var(--muted)">Add your trades and this panel will show exactly what you need to do to stay consistent.</p>`;
+  } else if(total<=0){
+    g.innerHTML = `<p>You're net <span class="neg">${usd(total,2)}</span>. The consistency rule only measures profit, so the first job is getting <b>net positive</b> toward the <span class="num">${usd(target)}</span> target.</p>`;
+    acts.innerHTML = A('1','Trade back to a net-positive balance before consistency applies.')
+                   + A('2','When you turn positive, keep individual winners similar in size.');
+  } else if(compliant){
+    g.innerHTML = `<p>Your best trade is <span class="pos">${usd(best,best%1?2:0)}</span> — <span class="num">${pct(ratio)}</span> of your <span class="num">${usd(total,total%1?2:0)}</span> total, under the 40% cap.</p>
+      <p>At this total, a single trade may be at most <span class="num">${usd(maxAllowedBest,maxAllowedBest%1?2:0)}</span>. A brand-new trade up to <span class="num">${usd(maxNewTrade,maxNewTrade%1?2:0)}</span> would still keep you inside the cap.</p>`;
+    acts.innerHTML =
+      (toTarget>0
+        ? A('1',`<b style="color:var(--txt)">${usd(toTarget)}</b> of profit left to hit the ${usd(target)} target.`)
+        : A('✓',`Profit target of ${usd(target)} already reached.`))
+      + A('2',`Keep any single trade at or below <b style="color:var(--txt)">${usd(maxNewTrade,0)}</b> to stay consistent.`)
+      + A('3','Spread profit across multiple similar trades rather than one outlier.');
+  } else {
+    g.innerHTML = `<p>Your best trade of <span class="neg">${usd(best,best%1?2:0)}</span> is <span class="num">${pct(ratio)}</span> of total — at or above the 40% cap. The trade itself is fine; your <b>total is too small relative to it</b>.</p>
+      <p>To bring it under 40%, your total must exceed <span class="num">${usd(minTotal,minTotal%1?2:0)}</span> — about <span class="num">${usd(addNeeded,addNeeded%1?2:0)}</span> more net profit from <b>other</b> trades.</p>`;
+    acts.innerHTML =
+      A('1',`Add <b style="color:var(--txt)">${usd(addNeeded,0)}+</b> in net profit from additional trades.`)
+      + A('2',`Keep each new trade <b style="color:var(--txt)">below ${usd(best,0)}</b> so it doesn't become the new outlier.`)
+      + A('3','Avoid losses now — they shrink the total and push the ratio higher.');
+  }
+}
+
+render();
+</script>
+</body>
+</html>
