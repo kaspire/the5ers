@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Access — The5ers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  /* ======================================================================
+     EDIT EVERYTHING IN THE <script> CONFIG BLOCK AT THE BOTTOM.
+     You normally never need to touch the CSS or HTML.
+     ====================================================================== */
+  :root{
+    --bg:#f4f7fb;
+    --surface:#ffffff;
+    --ink:#0e2a4f;
+    --ink-soft:#3a4f6d;
+    --muted:#6b7c95;
+    --line:#e3e9f2;
+    --accent:#1f5fbf;
+    --accent-ink:#ffffff;
+    --ok:#138a5e;
+    --shadow:0 1px 2px rgba(14,42,79,.04),0 8px 28px rgba(14,42,79,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    min-height:100vh;
+    padding:48px 20px;
+  }
+  .wrap{max-width:880px;margin:0 auto}
+
+  header.page{margin-bottom:34px}
+  .eyebrow{
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;margin:0 0 8px;
+  }
+  h1{font-size:30px;line-height:1.15;font-weight:700;margin:0 0 8px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:15.5px;margin:0;max-width:54ch}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}body{padding:32px 16px}}
+
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    padding:22px 22px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;
+  }
+  .card.disabled{opacity:.62;box-shadow:none;background:#fbfcfe}
+
+  .card-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .platform{font-size:17px;font-weight:700;letter-spacing:-.01em}
+  .tag{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+       color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+  .desc{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+
+  .field{margin-bottom:10px}
+  .field-label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:5px}
+  .field-row{display:flex;align-items:stretch;gap:7px}
+  .val{
+    flex:1;min-width:0;display:flex;align-items:center;
+    font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:14px;font-weight:500;color:var(--ink);
+    background:#f6f8fc;border:1px solid var(--line);border-radius:9px;
+    padding:9px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .copy,.eye{
+    flex:none;border:1px solid var(--line);background:#fff;color:var(--ink-soft);
+    border-radius:9px;padding:0 12px;font:inherit;font-size:12.5px;font-weight:600;
+    cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px;
+  }
+  .eye{padding:0 11px}
+  .copy:hover,.eye:hover{border-color:var(--accent);color:var(--accent)}
+  .copy.done{border-color:var(--ok);color:var(--ok);background:#f1faf5}
+  .copy svg,.eye svg{width:14px;height:14px;display:block}
+
+  .open{
+    margin-top:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--accent);color:var(--accent-ink);border:none;border-radius:11px;
+    padding:12px 16px;font:inherit;font-size:14.5px;font-weight:600;cursor:pointer;
+    transition:.15s;width:100%;text-decoration:none;
+  }
+  .open:hover{background:#184c9c}
+  .open svg{width:15px;height:15px}
+  .note{margin-top:13px;font-size:12.5px;color:var(--muted);background:#f6f8fc;border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+
+  .card.wide{grid-column:1 / -1}
+  .steps{list-style:none;counter-reset:s;margin:4px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:680px){.steps{grid-template-columns:1fr}}
+  .steps li{counter-increment:s;position:relative;background:#f6f8fc;border:1px solid var(--line);border-radius:10px;padding:13px 14px 13px 44px;font-size:13.5px;color:var(--ink-soft)}
+  .steps li::before{content:counter(s);position:absolute;left:12px;top:12px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .steps li b{display:block;color:var(--ink);font-weight:600;font-size:14px;margin-bottom:1px}
+
+  footer.page{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13px;color:var(--muted)}
+  footer.page .foot-note{flex:1;min-width:200px}
+  footer.page .copyright{font-weight:600;color:var(--ink-soft);white-space:nowrap}
+  footer.page a{color:var(--accent);font-weight:600;text-decoration:none}
+  footer.page a:hover{text-decoration:underline}
+
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);
+    background:var(--ink);color:#fff;font-size:13px;font-weight:500;padding:9px 16px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:.22s;z-index:20;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="page">
+      <p class="eyebrow" id="eyebrow"></p>
+      <h1 id="title"></h1>
+      <p class="sub" id="subtitle"></p>
+    </header>
+
+    <main class="grid" id="grid"></main>
+
+    <footer class="page" id="footer"></footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ========================================================================
+   CONFIG — this is the only part you edit.
+   - Fill in the MT5 details (replace every PASTE_… placeholder).
+   - If MT5 is an app login with no web URL, set  url: ''  and write an
+     instruction in  appNote  instead. The Open button is then hidden.
+   - Set WELCOME_URL to your welcome page/doc, or '' to hide that link.
+   ======================================================================== */
+
+const HEADER = {
+  eyebrow: "",
+  title:   "The5ers Spread Account Access",
+  subtitle:"Pick your platform, copy the login details, and open the terminal. The Copy buttons put the value straight on your clipboard — just paste it in."
+};
+
+const WELCOME_URL = "PASTE_WELCOME_DOC_URL";   // e.g. https://... ; set '' to hide
+
+const ACCOUNTS = [
+  {
+    platform: "TradingView Web Terminal",
+    tag: "Browser",
+    desc: "Runs in the browser. Nothing to download.",
+    url: "https://terminal.the5ers.com/signin.html",
+    openLabel: "Open TradingView",
+    fields: [
+      { label: "Login",    value: "1307" },
+      { label: "Password", value: "5ers10!@", secret: true }
+    ]
+  },
+  {
+    platform: "MetaTrader 5",
+    tag: "MT5",
+    desc: "Desktop / mobile app or the MT5 web terminal — same login for both.",
+    url: "https://mt5.the5ers.com/terminal",
+    openLabel: "Open MT5 Web",
+    appNote: "Desktop app: File → Login to Trade Account, then enter the login, password and server above.",
+    fields: [
+      { label: "Login",    value: "24088398" },
+      { label: "Password", value: "Investor5ers.", secret: true },
+      { label: "Server",   value: "FivePercentOnline-Real" }
+    ]
+  },
+  {
+    platform: "Futures — BlackArrow",
+    tag: "Your own demo",
+    desc: "Different from the two above: BlackArrow is one demo per person, not a shared login. Download it, then set your own password.",
+    url: "https://use.blackarrowtrading.com/trial-us-the5ers",
+    openLabel: "Download BlackArrow",
+    wide: true,
+    steps: [
+      { title: "Install", text: "Run the download and install the platform." },
+      { title: "Open", text: "Launch BlackArrow once it's installed." },
+      { title: "Reset password", text: "Set your own password — this becomes your personal demo login." }
+    ]
+  }
+];
+
+/* ========================================================================
+   Below here is the machinery. You shouldn't need to change it.
+   ======================================================================== */
+
+const ICON = {
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.2A10.9 10.9 0 0 1 12 4c6.5 0 10 7 10 7a18 18 0 0 1-2.6 3.6M6.6 6.6A18 18 0 0 0 2 11s3.5 7 10 7a10.9 10.9 0 0 0 3.4-.5M3 3l18 18"/></svg>',
+  open:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>'
+};
+
+const el = (t, c, h) => { const n = document.createElement(t); if(c) n.className=c; if(h!=null) n.innerHTML=h; return n; };
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('show'),1500);
+}
+
+async function copy(text, btn){
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; }
+  catch(e){
+    const ta = el('textarea'); ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand('copy'); } catch(_){}
+    ta.remove();
+  }
+  if(ok){
+    const label = btn.querySelector('.lbl');
+    btn.classList.add('done');
+    btn.querySelector('.ico').innerHTML = ICON.check;
+    if(label) label.textContent = 'Copied';
+    toast('Copied to clipboard');
+    setTimeout(()=>{
+      btn.classList.remove('done');
+      btn.querySelector('.ico').innerHTML = ICON.copy;
+      if(label) label.textContent = 'Copy';
+    }, 1500);
+  } else { toast('Press Ctrl/Cmd+C to copy'); }
+}
+
+function field(f){
+  const wrap = el('div','field');
+  wrap.appendChild(el('div','field-label', f.label));
+  const row = el('div','field-row');
+
+  const val = el('div','val');
+  const masked = !!f.secret;
+  val.dataset.real = f.value;
+  val.dataset.masked = masked ? '1' : '0';
+  val.textContent = masked ? '•'.repeat(Math.min(f.value.length,12)) : f.value;
+  row.appendChild(val);
+
+  if(masked){
+    const eye = el('button','eye','<span class="ico">'+ICON.eye+'</span>');
+    eye.type='button';
+    eye.setAttribute('aria-label','Show or hide');
+    eye.onclick = ()=>{
+      const m = val.dataset.masked === '1';
+      val.dataset.masked = m ? '0' : '1';
+      val.textContent = m ? val.dataset.real : '•'.repeat(Math.min(val.dataset.real.length,12));
+      eye.querySelector('.ico').innerHTML = m ? ICON.eyeOff : ICON.eye;
+    };
+    row.appendChild(eye);
+  }
+
+  const cp = el('button','copy','<span class="ico">'+ICON.copy+'</span><span class="lbl">Copy</span>');
+  cp.type='button';
+  cp.setAttribute('aria-label','Copy '+f.label);
+  cp.onclick = ()=>copy(f.value, cp);
+  row.appendChild(cp);
+
+  wrap.appendChild(row);
+  return wrap;
+}
+
+function card(a){
+  const c = el('div','card'+(a.disabled?' disabled':'')+(a.wide?' wide':''));
+  const head = el('div','card-head');
+  head.appendChild(el('div','platform', a.platform));
+  if(a.tag) head.appendChild(el('span','tag', a.tag));
+  c.appendChild(head);
+  if(a.desc) c.appendChild(el('p','desc', a.desc));
+
+  if(a.disabled) return c;
+
+  (a.fields||[]).forEach(f => c.appendChild(field(f)));
+
+  const hasUrl = a.url && !/^PASTE_/.test(a.url) && a.url.trim() !== '';
+  const openBtn = () => {
+    const open = el('a','open','<span>'+(a.openLabel||'Open')+'</span>'+ICON.open);
+    open.href = a.url; open.target = '_blank'; open.rel = 'noopener noreferrer';
+    return open;
+  };
+
+  if(a.steps){
+    // download/launch action comes first, then the numbered steps
+    if(hasUrl) c.appendChild(openBtn());
+    const ol = el('ol','steps');
+    a.steps.forEach(s => ol.appendChild(el('li', null, '<b>'+s.title+'</b>'+s.text)));
+    c.appendChild(ol);
+  } else if(hasUrl){
+    c.appendChild(openBtn());
+  } else if(a.appNote){
+    c.appendChild(el('div','note', a.appNote));
+  }
+  return c;
+}
+
+(function init(){
+  const eb = document.getElementById('eyebrow');
+  if(HEADER.eyebrow){ eb.textContent = HEADER.eyebrow; } else { eb.style.display = 'none'; }
+  document.getElementById('title').textContent = HEADER.title || '';
+  document.getElementById('subtitle').textContent = HEADER.subtitle || '';
+
+  const grid = document.getElementById('grid');
+  ACCOUNTS.forEach(a => grid.appendChild(card(a)));
+
+  const foot = document.getElementById('footer');
+  const noteWrap = el('div','foot-note');
+  if(WELCOME_URL && !/^PASTE_/.test(WELCOME_URL)){
+    const a = el('a',null,'Full welcome guide');
+    a.href = WELCOME_URL; a.target='_blank'; a.rel='noopener noreferrer';
+    noteWrap.appendChild(a);
+    noteWrap.appendChild(el('span',null,'  ·  '));
+  }
+  noteWrap.appendChild(el('span',null,'Tap Copy, switch to the opened tab, then paste into the field.'));
+  foot.appendChild(noteWrap);
+
+  const year = new Date().getFullYear();
+  foot.appendChild(el('span','copyright','© ' + year + ' The Gold Squad'));
+})();
+</script>
+</body>
+</html>
